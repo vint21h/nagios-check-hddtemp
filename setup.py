@@ -24,6 +24,7 @@ setup(
     version = __version__,
     packages = find_packages(),
     scripts = ['check_hddtemp.py', ],
+    install_requires = ['docutils', ],
     package_data = {
         '': SHARE_FILES,
     },
