@@ -23,6 +23,7 @@
 try:
 	import sys
 	import os
+	import socket
 except ImportError, err:
 	print "ERROR: Couldn't load module. %s" % (err)
 	sys.exit(0)
@@ -36,9 +37,24 @@ __version__ = "0.01"
 """Global variables
 """
 
+__port = 7634
+
 """Check command line parameters supplied and get it
 """
 
-if len(sys.argv) < 4:
-	print ("Usage: %s [device] [warning temperature] [critical temperature]" % (sys.argv[0]))
+if len(sys.argv) < 5:
+	print ("Usage: %s [host] [device] [warning temperature] [critical temperature]" % (sys.argv[0]))
 	sys.exit(0)
+__host = sys.argv[1]
+
+"""Connect to server and get response
+"""
+
+__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+	__socket.connect((__host, __port))
+except Error, err:
+	print "ERROR: Couldn't connect to server. %s" % (err)
+	sys.exit(0)
+__result = __socket.recv(4096)
+__socket.close()
