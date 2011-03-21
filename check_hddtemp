@@ -32,7 +32,7 @@ except ImportError, err:
 """
 
 __author__ = "vINT 21h <vint21h@vint21h.pp.ua>"
-__version__ = "0.01"
+__version__ = "0.001"
 
 """Global variables
 """
@@ -46,6 +46,9 @@ if len(sys.argv) < 5:
 	print ("Usage: %s [host] [device] [warning temperature] [critical temperature]" % (sys.argv[0]))
 	sys.exit(0)
 __host = sys.argv[1]
+__device = sys.argv[2]
+__warn = int(sys.argv[3])
+__crit = int(sys.argv[4])
 
 """Connect to server and get response
 """
@@ -58,3 +61,25 @@ except Error, err:
 	sys.exit(0)
 __result = __socket.recv(4096)
 __socket.close()
+
+
+"""Search for device and get HDD info from server response
+"""
+
+try:
+	__result = __result.split('|')
+	__pos = __result.index(__device)
+except ValueError:
+	print "ERROR: Couldn't find device in server response"
+	sys.exit()
+
+__model = __result[__pos + 1]
+__temperature = int(__result[__pos + 2])
+__tscale = __result[__pos + 3]
+
+if __temperature > __crit:
+	print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (__temperature, __tscale, __crit, __tscale)
+elif __temperature > __warn:
+	"WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (__temperature, __tscale, __warn, __tscale)
+else:
+	print "OK: device is functional and stable (temperature: %d %s)" % (__temperature, __tscale)
