@@ -77,6 +77,9 @@ __model = __result[__pos + 1]
 __temperature = int(__result[__pos + 2])
 __tscale = __result[__pos + 3]
 
+"""Return device information to nagios
+"""
+
 if __temperature > __crit:
 	print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (__temperature, __tscale, __crit, __tscale)
 elif __temperature > __warn:
