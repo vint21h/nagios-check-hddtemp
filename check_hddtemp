@@ -23,6 +23,7 @@
 try:
 	import sys
 	import os
+	from optparse import OptionParser
 	import socket
 except ImportError, err:
 	print "ERROR: Couldn't load module. %s" % (err)
