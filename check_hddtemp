@@ -28,11 +28,10 @@ except ImportError, err:
     print "ERROR: Couldn't load module. %s" % (err)
     sys.exit(0)
 
-"""Package versioning
-"""
 
+# versioning
 __author__ = "vINT 21h <vint21h@vint21h.pp.ua>"
-__version__ = "0.03"
+__version__ = "0.2"
 
 
 def parsecmdline(args):
@@ -74,6 +73,7 @@ def getdata(server, port):
     socket_.close()
     return response
 
+
 def parseresponse(response, device):
     """
     Search for device and get HDD info from server response
@@ -88,6 +88,7 @@ def parseresponse(response, device):
             "temperature": int(response[position + 2]),
             "tempscale": response[position + 3]
             }
+
 
 if __name__ == "__main__":
     (OPTIONS, args) = parsecmdline(sys.argv)
