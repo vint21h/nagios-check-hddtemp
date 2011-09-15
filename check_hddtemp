@@ -21,13 +21,13 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 try:
-	import sys
-	import os
-	from optparse import OptionParser
-	import socket
+    import sys
+    import os
+    from optparse import OptionParser
+    import socket
 except ImportError, err:
-	print "ERROR: Couldn't load module. %s" % (err)
-	sys.exit(0)
+    print "ERROR: Couldn't load module. %s" % (err)
+    sys.exit(0)
 
 """Package versioning
 """
@@ -35,10 +35,6 @@ except ImportError, err:
 __author__ = "vINT 21h <vint21h@vint21h.pp.ua>"
 __version__ = "0.01"
 
-"""Global variables
-"""
-
-__port = 7634
 
 def parsecmdline(args):
     """
@@ -46,69 +42,72 @@ def parsecmdline(args):
     """
     version = "%%prog %s" % (__version__)
     parser = OptionParser(version=version)
-    parser.add_option("-h", "--host", action="store", dest="host",
-                                            default="", metavar="HOST",
-                                            help="host name")
-	parser.add_option("-p", "--port", action="store", dest="port",
-                                            default="", metavar="PORT",
+    parser.add_option("-s", "--server", action="store", dest="server",
+                                            default="", metavar="SERVER",
+                                            help="server address")
+    parser.add_option("-p", "--port", action="store", dest="port",
+                                            default="7634", metavar="PORT",
                                             help="port number")
-	parser.add_option("-d", "--device", action="store", dest="device",
+    parser.add_option("-d", "--device", action="store", dest="device",
                                             default="", metavar="DEVICE",
                                             help="device name")
-	parser.add_option("-w", "--warning", action="store", dest="warning",
-                                            default="40", metavar="WARNING",
+    parser.add_option("-w", "--warning", action="store", type="int",
+                            dest="warning", default="40", metavar="TEMP",
                                             help="warning temperature")
-	parser.add_option("-c", "--critical", action="store", dest="critical",
-                                            default="", metavar="CRITICAL",
+    parser.add_option("-c", "--critical", action="store", type="int",
+                            dest="critical", default="65", metavar="TEMP",
                                             help="critical temperature")
 
     return parser.parse_args(args)
 
-
-"""Check command line parameters supplied and get it
-"""
-
-if len(sys.argv) < 5:
-	print ("Usage: %s [host] [device] [warning temperature] [critical temperature]" % (sys.argv[0]))
-	sys.exit(0)
-__host = sys.argv[1]
-__device = sys.argv[2]
-__warn = int(sys.argv[3])
-__crit = int(sys.argv[4])
-
-"""Connect to server and get response
-"""
-
-__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-try:
-	__socket.connect((__host, __port))
-except Error, err:
-	print "ERROR: Couldn't connect to server. %s" % (err)
-	sys.exit(0)
-__result = __socket.recv(4096)
-__socket.close()
+def getdata(server, port):
+    """
+    Connect to server and get response
+    """
+    Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        Socket.connect((options.server, options.port))
+    except Error, err:
+        print "ERROR: Couldn't connect to server. %s" % (err)
+        sys.exit(0)
+    response = Socket.recv(4096)
+    Socket.close()
+    return response
 
 
-"""Search for device and get HDD info from server response
-"""
+if __name__ == "__main__":
+    (options, args) = parsecmdline(sys.argv)
+    """Check command line parameters supplied and get it
+    """
 
-try:
-	__result = __result.split('|')
-	__pos = __result.index(__device)
-except ValueError:
-	print "ERROR: Couldn't find device in server response"
-	sys.exit()
+    #if len(sys.argv) < 5:
+        #print ("Usage: %s [host] [device] [warning temperature] [critical temperature]" % (sys.argv[0]))
+        #sys.exit(0)
+    #options.server = sys.argv[1]
+    #options.device = sys.argv[2]
+    #options.warning = int(sys.argv[3])
+    #options.critical = int(sys.argv[4])
 
-__model = __result[__pos + 1]
-__temperature = int(__result[__pos + 2])
-__tscale = __result[__pos + 3]
+    """Search for device and get HDD info from server response
+    """
 
-"""Return device information to nagios
-"""
+    try:
+        __result = __result.split('|')
+        __pos = __result.index(options.device)
+    except ValueError:
+        print "ERROR: Couldn't find device in server response"
+        sys.exit()
 
-if __temperature > __crit:
-	print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (__temperature, __tscale, __crit, __tscale)
-elif __temperature > __warn:
-	"WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (__temperature, __tscale, __warn, __tscale)
-else:
-	print "OK: device is functional and stable (temperature: %d %s)" % (__temperature, __tscale)
+    __model = __result[__pos + 1]
+    __temperature = int(__result[__pos + 2])
+    __tscale = __result[__pos + 3]
+
+    """Return device information to nagios
+    """
+
+    if __temperature > options.critical:
+        print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (__temperature, __tscale, options.critical, __tscale)
+    elif __temperature > options.warning:
+        print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (__temperature, __tscale, options.warning, __tscale)
+    else:
+        print "OK: device is functional and stable (temperature: %d %s)" % (__temperature, __tscale)
