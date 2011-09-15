@@ -33,12 +33,37 @@ except ImportError, err:
 """
 
 __author__ = "vINT 21h <vint21h@vint21h.pp.ua>"
-__version__ = "0.001"
+__version__ = "0.01"
 
 """Global variables
 """
 
 __port = 7634
+
+def parsecmdline(args):
+    """
+    Commandline options arguments parsing
+    """
+    version = "%%prog %s" % (__version__)
+    parser = OptionParser(version=version)
+    parser.add_option("-h", "--host", action="store", dest="host",
+                                            default="", metavar="HOST",
+                                            help="host name")
+	parser.add_option("-p", "--port", action="store", dest="port",
+                                            default="", metavar="PORT",
+                                            help="port number")
+	parser.add_option("-d", "--device", action="store", dest="device",
+                                            default="", metavar="DEVICE",
+                                            help="device name")
+	parser.add_option("-w", "--warning", action="store", dest="warning",
+                                            default="40", metavar="WARNING",
+                                            help="warning temperature")
+	parser.add_option("-c", "--critical", action="store", dest="critical",
+                                            default="", metavar="CRITICAL",
+                                            help="critical temperature")
+
+    return parser.parse_args(args)
+
 
 """Check command line parameters supplied and get it
 """
