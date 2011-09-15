@@ -1,0 +1,25 @@
+check_hddtemp is a Nagios-plugin that uses hddtemp
+(www.guzu.net/linux/hddtemp.php) to check disk temperature over the network
+
+INSTALATION
+copy check_hddtemp into your Nagios plugins directory
+
+CONFIGURATION
+Read Nagios documentation and create command and service definition like this:
+
+# check_hddtemp command
+	define command {
+	command_name check_hddtemp
+	command_line $USER1$/check_hddtemp -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
+}
+
+define service {
+	use 				local-service
+	host_name           localhost
+	service_description HDD Temperature /dev/sda
+	check_command		check_hddtemp!127.0.0.1!7634!/dev/sda!40!50
+}
+
+CONTACTS
+Project Website: https://github.com/vint21h/check_hddtemp
+Author: vINT 21h <vint21h@vint21h.pp.ua>
