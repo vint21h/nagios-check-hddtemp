@@ -91,13 +91,12 @@ def parseresponse(response, device):
 
 if __name__ == "__main__":
     (OPTIONS, args) = parsecmdline(sys.argv)
-    data = parseresponse(getdata(OPTIONS.server, OPTIONS.port), OPTIONS.device)
-    """
-    Return device information to nagios
-    """
-    if data["temperature"] > OPTIONS.critical:
-        print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (data["temperature"], data["tempscale"], OPTIONS.critical, data["tempscale"])
-    elif data["temperature"] > OPTIONS.warning:
-        print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (data["temperature"], data["tempscale"], OPTIONS.warning, data["tempscale"])
+    DATA = parseresponse(getdata(OPTIONS.server, OPTIONS.port), OPTIONS.device)
+
+    # returning information to nagios
+    if DATA["temperature"] > OPTIONS.critical:
+        print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], OPTIONS.critical, DATA["tempscale"])
+    elif DATA["temperature"] > OPTIONS.warning:
+        print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], OPTIONS.warning, DATA["tempscale"])
     else:
-        print "OK: device is functional and stable (temperature: %d %s)" % (data["temperature"], data["tempscale"])
+        print "OK: device is functional and stable (temperature: %d %s)" % (DATA["temperature"], DATA["tempscale"])
