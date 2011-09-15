@@ -44,7 +44,7 @@ def parsecmdline(args):
                                             default="", metavar="SERVER",
                                             help="server address")
     parser.add_option("-p", "--port", action="store", type="int",
-                                dest="port",default="7634", metavar="PORT",
+                                dest="port", default="7634", metavar="PORT",
                                             help="port number")
     parser.add_option("-d", "--device", action="store", dest="device",
                                             default="", metavar="DEVICE",
