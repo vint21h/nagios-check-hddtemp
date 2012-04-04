@@ -41,7 +41,6 @@ VERSION = (0, 2, 0)
 __version__ = '.'.join(map(str, VERSION))
 
 
-
 def parse_cmd_line():
     """
     Commandline options arguments parsing.
@@ -50,21 +49,26 @@ def parse_cmd_line():
     version = "%%prog %s" % (__version__)
     parser = OptionParser(version=version)
     parser.add_option("-s", "--server", action="store", dest="server",
+    										type="string",
                                             default="", metavar="SERVER",
                                             help="server address")
-    parser.add_option("-p", "--port", action="store", type="int",
-                                dest="port", default="7634", metavar="PORT",
+    parser.add_option("-p", "--port", action="store", type="int", dest="port",
+    										default="7634", metavar="PORT",
                                             help="port number")
     parser.add_option("-d", "--device", action="store", dest="device",
-                                            default="", metavar="DEVICE",
-                                            help="device name")
+    										type="string", default="",
+    										metavar="DEVICE", help="device name")
+    parser.add_option("-S", "--separator", action="store", type="string",
+    										dest="separator", default="|",
+    										metavar="SAPARATOR",
+                                            help="hddtemp separator")
     parser.add_option("-w", "--warning", action="store", type="int",
                             dest="warning", default="40", metavar="TEMP",
                                             help="warning temperature")
     parser.add_option("-c", "--critical", action="store", type="int",
                             dest="critical", default="65", metavar="TEMP",
                                             help="critical temperature")
-	parser.add_option("-q", "--quiet", metavar="QUIET", action="store_false",
+    parser.add_option("-q", "--quiet", metavar="QUIET", action="store_false",
                                         default=False, dest="quiet",
                                         help="be quiet")
 
@@ -79,19 +83,22 @@ def parse_cmd_line():
     return options
 
 
-def get_data(server, port):
+def get_hddtemp_data(server, port):
     """
-    Connect to server and get response.
+    Get and return data from hddtemp server response.
     """
 
     socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         socket_.connect((server, port))
-    except socket.error, err:
-        print "ERROR: Couldn't connect to server. %s" % (err)
-        sys.exit(0)
+    except socket.error:
+        print "ERROR: Server communicating problem."
+        socket_.close()
+        sys.exit(-1)
+
     response = socket_.recv(4096)
     socket_.close()
+
     return response
 
 
@@ -113,13 +120,16 @@ def parse_response(response, device):
 
 
 if __name__ == "__main__":
-    OPTIONS = parse_cmd_line()
-    # DATA = parse_response(get_data(OPTIONS.server, OPTIONS.port), OPTIONS.device)
+	pass
+    # options = parse_cmd_line()
+    # print options
+    # print get_hddtemp_data(options.server, options.port)
+    # DATA = parse_response(get_hddtemp_data(options.server, options.port), options.device)
 
     # returning information to nagios
-    # if DATA["temperature"] > OPTIONS.critical:
-    #     print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], OPTIONS.critical, DATA["tempscale"])
-    # elif DATA["temperature"] > OPTIONS.warning:
-    #     print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], OPTIONS.warning, DATA["tempscale"])
+    # if DATA["temperature"] > options.critical:
+    #     print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], options.critical, DATA["tempscale"])
+    # elif DATA["temperature"] > options.warning:
+    #     print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], options.warning, DATA["tempscale"])
     # else:
     #     print "OK: device is functional and stable (temperature: %d %s)" % (DATA["temperature"], DATA["tempscale"])
