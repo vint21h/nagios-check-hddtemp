@@ -49,18 +49,18 @@ def parse_cmd_line():
     version = "%%prog %s" % (__version__)
     parser = OptionParser(version=version)
     parser.add_option("-s", "--server", action="store", dest="server",
-    										type="string",
+                                            type="string",
                                             default="", metavar="SERVER",
                                             help="server address")
     parser.add_option("-p", "--port", action="store", type="int", dest="port",
-    										default="7634", metavar="PORT",
+                                            default="7634", metavar="PORT",
                                             help="port number")
     parser.add_option("-d", "--device", action="store", dest="device",
-    										type="string", default="",
-    										metavar="DEVICE", help="device name")
+                                            type="string", default="",
+                                            metavar="DEVICE", help="device name")
     parser.add_option("-S", "--separator", action="store", type="string",
-    										dest="separator", default="|",
-    										metavar="SAPARATOR",
+                                            dest="separator", default="|",
+                                            metavar="SAPARATOR",
                                             help="hddtemp separator")
     parser.add_option("-w", "--warning", action="store", type="int",
                             dest="warning", default="40", metavar="TEMP",
@@ -88,42 +88,56 @@ def get_hddtemp_data(server, port):
     Get and return data from hddtemp server response.
     """
 
-    socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        socket_.connect((server, port))
+        _socket.connect((server, port))
     except socket.error:
         print "ERROR: Server communicating problem."
         socket_.close()
         sys.exit(-1)
 
-    response = socket_.recv(4096)
-    socket_.close()
+    response = _socket.recv(4096)
+    _socket.close()
 
     return response
 
 
-def parse_response(response, device):
+def parse_response(response, device, separator):
     """
     Search for device and get HDD info from server response.
     """
 
-    try:
-        response = response.split('|')
-        position = response.index(device)
-    except ValueError:
-        print "ERROR: Couldn't find device in server response"
-        sys.exit(0)
-    return {"hddmodel": response[position + 1],
-            "temperature": int(response[position + 2]),
-            "tempscale": response[position + 3]
-            }
+	# |/dev/hda|SAMSUNG SV0412H|250|C||/dev/hdb|SAMSUNG SP0802N|32|C||/dev/sda|HDS722525VLSA80|32|C|
+
+    hdd_info_keys = ['hdd_model', 'temperature', 'scale', ]
+    dev_info = {}
+
+    for dev in response.split(separator*2):
+        dev =  dev.strip(separator).split(separator)
+        dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
+
+    return dev_info
+
+    # try:
+    #     response = response.split('|')
+    #     position = response.index(device)
+    # except ValueError:
+    #     print "ERROR: Couldn't find device in server response"
+    #     sys.exit(0)
+    # return {"hddmodel": response[position + 1],
+    #         "temperature": int(response[position + 2]),
+    #         "tempscale": response[position + 3]
+    #         }
 
 
 if __name__ == "__main__":
-	pass
-    # options = parse_cmd_line()
+    pass
+    options = parse_cmd_line()
     # print options
-    # print get_hddtemp_data(options.server, options.port)
+    data = get_hddtemp_data(options.server, options.port)
+    # print data
+    response = parse_response(data, options.device, options.separator)
+    # print response
     # DATA = parse_response(get_hddtemp_data(options.server, options.port), options.device)
 
     # returning information to nagios
