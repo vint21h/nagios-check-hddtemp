@@ -131,14 +131,19 @@ def check_hddtemp(response, options):
     """
 
     if int(response["temperature"]) > options.critical:
-        print "CRITICAL: device temperature (%s %s) exceeds critical temperature threshold (%d %s)" % (response["temperature"], response["scale"], options.critical, response["scale"])
+    	data =
+    	{
+    		'temperature': response["temperature"],
+    		'critical': options.critical,
+    		'scale': response["scale"],
+    	}
+        print "CRITICAL: device temperature (%(temperature)s %(scale)s) exceeds critical temperature threshold (%(critical)d %(scale)s)" % data
     elif int(response["temperature"]) > options.warning:
-        print "WARNING: device temperature (%s %s) exceeds warning temperature threshold (%d %s)" % (response["temperature"], response["pscale"], options.warning, response["scale"])
+        print "WARNING: device temperature (%s %s) exceeds warning temperature threshold (%d %s)" % (response["temperature"], response["scale"], options.warning, response["scale"])
     else:
         print "OK: device is functional and stable (temperature: %s %s)" % (response["temperature"], response["scale"])
 
 
 if __name__ == "__main__":
-    pass
     options = parse_cmd_line()
     check_hddtemp(parse_response(get_hddtemp_data(options.server, options.port), options.device, options.separator), options)
