@@ -23,13 +23,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 try:
-    import sys
     from optparse import OptionParser
     import socket
 except ImportError, err:
     print "ERROR: Couldn't load module. %s" % (err)
-    sys.exit(0)
+    sys.exit(-1)
 
 # metadata
 __author__ = "Alexei Andrushievich"
@@ -107,43 +108,37 @@ def parse_response(response, device, separator):
     Search for device and get HDD info from server response.
     """
 
-	# |/dev/hda|SAMSUNG SV0412H|250|C||/dev/hdb|SAMSUNG SP0802N|32|C||/dev/sda|HDS722525VLSA80|32|C|
-
     hdd_info_keys = ['hdd_model', 'temperature', 'scale', ]
     dev_info = {}
 
     for dev in response.split(separator*2):
         dev =  dev.strip(separator).split(separator)
+        if len(dev) != 4:
+            print "ERROR: Server response parsing error."
+            sys.exit(-1)
         dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
 
-    return dev_info
+    if device not in dev_info.keys():
+        print "ERROR: Info about requested device not founded in server response."
+        sys.exit(0)
 
-    # try:
-    #     response = response.split('|')
-    #     position = response.index(device)
-    # except ValueError:
-    #     print "ERROR: Couldn't find device in server response"
-    #     sys.exit(0)
-    # return {"hddmodel": response[position + 1],
-    #         "temperature": int(response[position + 2]),
-    #         "tempscale": response[position + 3]
-    #         }
+    return dev_info[device]
+
+
+def check_hddtemp(response, options):
+    """
+    Return info about HDD statuses.
+    """
+
+    if int(response["temperature"]) > options.critical:
+        print "CRITICAL: device temperature (%s %s) exceeds critical temperature threshold (%d %s)" % (response["temperature"], response["scale"], options.critical, response["scale"])
+    elif int(response["temperature"]) > options.warning:
+        print "WARNING: device temperature (%s %s) exceeds warning temperature threshold (%d %s)" % (response["temperature"], response["pscale"], options.warning, response["scale"])
+    else:
+        print "OK: device is functional and stable (temperature: %s %s)" % (response["temperature"], response["scale"])
 
 
 if __name__ == "__main__":
     pass
     options = parse_cmd_line()
-    # print options
-    data = get_hddtemp_data(options.server, options.port)
-    # print data
-    response = parse_response(data, options.device, options.separator)
-    # print response
-    # DATA = parse_response(get_hddtemp_data(options.server, options.port), options.device)
-
-    # returning information to nagios
-    # if DATA["temperature"] > options.critical:
-    #     print "CRITICAL: device temperature (%d %s) exceeds critical temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], options.critical, DATA["tempscale"])
-    # elif DATA["temperature"] > options.warning:
-    #     print "WARNING: device temperature (%d %s) exceeds warning temperature threshold (%d %s)" % (DATA["temperature"], DATA["tempscale"], options.warning, DATA["tempscale"])
-    # else:
-    #     print "OK: device is functional and stable (temperature: %d %s)" % (DATA["temperature"], DATA["tempscale"])
+    check_hddtemp(parse_response(get_hddtemp_data(options.server, options.port), options.device, options.separator), options)
