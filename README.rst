@@ -6,6 +6,8 @@ A check_hddtemp documentation
 
     *check_hddtemp is a Nagios-plugin that that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
 
+.. contents::
+
 Installation
 ------------
 * Obtain your copy of source code from git repository: ``git clone https://vint21h@github.com/vint21h/check_hddtemp.git``. Or download latest release from https://github.com/vint21h/check_hddtemp/downloads.
