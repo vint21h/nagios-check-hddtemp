@@ -127,21 +127,35 @@ def parse_response(response, device, separator):
 
 def check_hddtemp(response, options):
     """
-    Return info about HDD statuses.
+    Return info about HDD statuses to Nagios.
     """
 
+    output_templates = {
+        'critical': "CRITICAL: device temperature (%(temperature)s%(scale)s) exceeds critical temperature threshold (%(critical)d%(scale)s)",
+        'warning': "WARNING: device temperature (%(temperature)s%(scale)s) exceeds warning temperature threshold (%(warning)d%(scale)s)",
+        'ok': "OK: device is functional and stable (%(temperature)s%(scale)s)",
+    }
+
     if int(response["temperature"]) > options.critical:
-    	data =
-    	{
-    		'temperature': response["temperature"],
-    		'critical': options.critical,
-    		'scale': response["scale"],
-    	}
-        print "CRITICAL: device temperature (%(temperature)s %(scale)s) exceeds critical temperature threshold (%(critical)d %(scale)s)" % data
-    elif int(response["temperature"]) > options.warning:
-        print "WARNING: device temperature (%s %s) exceeds warning temperature threshold (%d %s)" % (response["temperature"], response["scale"], options.warning, response["scale"])
+        data = {
+            'temperature': response["temperature"],
+            'critical': options.critical,
+            'scale': response["scale"],
+        }
+        print output_templates['critical'] % data
+    elif int(response["temperature"]) > options.warning and int(response["temperature"]) < options.critical:
+        data = {
+            'temperature': response["temperature"],
+            'warning': options.warning,
+            'scale': response["scale"],
+        }
+        print output_templates['warning'] % data
     else:
-        print "OK: device is functional and stable (temperature: %s %s)" % (response["temperature"], response["scale"])
+        data = {
+            'temperature': response["temperature"],
+            'scale': response["scale"],
+        }
+        print output_templates['ok'] % data
 
 
 if __name__ == "__main__":
