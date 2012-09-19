@@ -1,10 +1,10 @@
 .. nagios-check-hddtemp
 .. README.rst
 
-A check_hddtemp documentation
+A nagios-check-hddtemp documentation
 =============================
 
-    *check_hddtemp is a Nagios-plugin that that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
+    *nagios-check-hddtemp is a Nagios-plugin that that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
 
 .. contents::
 
