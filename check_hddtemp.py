@@ -2,15 +2,15 @@
 
 # -*- coding: utf-8 -*-
 
-# check_hddtemp
+# nagios-check-hddtemp
 # check_hddtemp.py
 
 # Copyright (c) 2011-2012 Alexei Andrushievich <vint21h@vint21h.pp.ua>
-# Check HDD temperature Nagios plugin [https://github.com/vint21h/check_hddtemp]
+# Check HDD temperature Nagios plugin [https://github.com/vint21h/nagios-check-hddtemp]
 #
-# This file is part of check_hddtemp.
+# This file is part of nagios-check-hddtemp.
 #
-# check_hddtemp is free software: you can redistribute it and/or modify
+# nagios-check-hddtemp is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -29,7 +29,7 @@ try:
     from optparse import OptionParser
     import socket
 except ImportError, err:
-    print "ERROR: Couldn't load module. %s" % (err)
+    sys.stderr.write("ERROR: Couldn't load module. %s\n" % err)
     sys.exit(-1)
 
 # metadata
@@ -37,8 +37,8 @@ __author__ = "Alexei Andrushievich"
 __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
-__url__ = "https://github.com/vint21h/check_hddtemp"
-VERSION = (0, 3, 0)
+__url__ = "https://github.com/vint21h/nagios-check-hddtemp"
+VERSION = (0, 4, 0)
 __version__ = '.'.join(map(str, VERSION))
 
 
@@ -52,22 +52,22 @@ def parse_cmd_line():
     parser.add_option("-s", "--server", action="store", dest="server",
                                             type="string",
                                             default="", metavar="SERVER",
-                                            help="server address")
+                                            help="server name or address")
     parser.add_option("-p", "--port", action="store", type="int", dest="port",
-                                            default="7634", metavar="PORT",
+                                            default=7634, metavar="PORT",
                                             help="port number")
     parser.add_option("-d", "--device", action="store", dest="device",
                                             type="string", default="",
                                             metavar="DEVICE", help="device name")
     parser.add_option("-S", "--separator", action="store", type="string",
                                             dest="separator", default="|",
-                                            metavar="SAPARATOR",
+                                            metavar="SEPARATOR",
                                             help="hddtemp separator")
     parser.add_option("-w", "--warning", action="store", type="int",
-                            dest="warning", default="40", metavar="TEMP",
+                            dest="warning", default=40, metavar="TEMP",
                                             help="warning temperature")
     parser.add_option("-c", "--critical", action="store", type="int",
-                            dest="critical", default="65", metavar="TEMP",
+                            dest="critical", default=65, metavar="TEMP",
                                             help="critical temperature")
     parser.add_option("-q", "--quiet", metavar="QUIET", action="store_false",
                                         default=False, dest="quiet",
@@ -78,7 +78,7 @@ def parse_cmd_line():
     # check mandatory command line options supplied
     mandatories = ["server", "device", ]
     if not all(options.__dict__[mandatory] for mandatory in mandatories):
-        print "Mandatory command line option missing."
+        sys.stderr.write("Mandatory command line option missing.\n")
         exit(0)
 
     return options
@@ -93,8 +93,8 @@ def get_hddtemp_data(server, port):
     try:
         _socket.connect((server, port))
     except socket.error:
-        print "ERROR: Server communicating problem."
-        socket_.close()
+        sys.stderr.write("ERROR: Server communicating problem.\n")
+        _socket.close()
         sys.exit(-1)
 
     response = _socket.recv(4096)
@@ -114,12 +114,12 @@ def parse_response(response, device, separator):
     for dev in response.split(separator*2):
         dev =  dev.strip(separator).split(separator)
         if len(dev) != 4:
-            print "ERROR: Server response parsing error."
+            sys.stderr.write("ERROR: Server response parsing error.\n")
             sys.exit(-1)
         dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
 
     if device not in dev_info.keys():
-        print "ERROR: Info about requested device not founded in server response."
+        sys.stderr.write("ERROR: Info about requested device not founded in server response.\n")
         sys.exit(0)
 
     return dev_info[device]
@@ -131,9 +131,9 @@ def check_hddtemp(response, options):
     """
 
     output_templates = {
-        'critical': "CRITICAL: device temperature (%(temperature)s%(scale)s) exceeds critical temperature threshold (%(critical)d%(scale)s)",
-        'warning': "WARNING: device temperature (%(temperature)s%(scale)s) exceeds warning temperature threshold (%(warning)d%(scale)s)",
-        'ok': "OK: device is functional and stable (%(temperature)s%(scale)s)",
+        'critical': "CRITICAL: device temperature (%(temperature)s%(scale)s) exceeds critical temperature threshold (%(critical)d%(scale)s)\n",
+        'warning': "WARNING: device temperature (%(temperature)s%(scale)s) exceeds warning temperature threshold (%(warning)d%(scale)s)\n",
+        'ok': "OK: device is functional and stable (%(temperature)s%(scale)s)\n",
     }
 
     if int(response["temperature"]) > options.critical:
@@ -142,21 +142,22 @@ def check_hddtemp(response, options):
             'critical': options.critical,
             'scale': response["scale"],
         }
-        print output_templates['critical'] % data
+        template = 'critical'
     elif int(response["temperature"]) > options.warning and int(response["temperature"]) < options.critical:
         data = {
             'temperature': response["temperature"],
             'warning': options.warning,
             'scale': response["scale"],
         }
-        print output_templates['warning'] % data
+        template = 'warning'
     else:
         data = {
             'temperature': response["temperature"],
             'scale': response["scale"],
         }
-        print output_templates['ok'] % data
+        template = 'ok'
 
+    sys.stdout.write(output_templates[template] % data)
 
 if __name__ == "__main__":
     options = parse_cmd_line()

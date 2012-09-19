@@ -1,5 +1,5 @@
-.. check_hddtemp
-.. check_hddtemp.py
+.. nagios-check-hddtemp
+.. README.rst
 
 A check_hddtemp documentation
 =============================
@@ -10,7 +10,7 @@ A check_hddtemp documentation
 
 Installation
 ------------
-* Obtain your copy of source code from git repository: ``git clone https://vint21h@github.com/vint21h/check_hddtemp.git``. Or download latest release from https://github.com/vint21h/check_hddtemp/downloads.
+* Obtain your copy of source code from git repository: ``git clone https://github.com/vint21h/nagios-check-hddtemp.git``. Or download latest release from https://github.com/vint21h/nagios-check-hddtemp/downloads.
 * Run ``./setup.py install`` from repository source tree or unpacked archive under root user.
 
 Configuration
@@ -25,7 +25,7 @@ Configuration
         define command
         {
             command_name check_hddtemp
-            command_line $CH$/check_hddtemp -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
+            command_line $CH$ -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
         }
 
     # 'example' service
@@ -39,6 +39,6 @@ Configuration
 
 Contacts
 --------
-**Project Website**: https://github.com/vint21h/check_hddtemp
+**Project Website**: https://github.com/vint21h/nagios-check-hddtemp
 
 **Author**: Alexei Andrushievich <vint21h@vint21h.pp.ua>
