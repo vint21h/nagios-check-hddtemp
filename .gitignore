@@ -1,0 +1,16 @@
+.*.swp
+*.pyc
+*.pyo
+*~
+*.orig
+*.bak
+.DS_Store
+*.save
+
+.idea/
+*sublime*
+*geany*
+*-venv/
+build/*
+dist/*
+*.egg-info/*
