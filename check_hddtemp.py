@@ -26,8 +26,9 @@
 import sys
 
 try:
-    from optparse import OptionParser
+    import telnetlib
     import socket
+    from optparse import OptionParser
 except ImportError, err:
     sys.stderr.write("ERROR: Couldn't load module. %s\n" % err)
     sys.exit(-1)
@@ -38,7 +39,7 @@ __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
 __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
-VERSION = (0, 4, 1)
+VERSION = (0, 4, 2)
 __version__ = '.'.join(map(str, VERSION))
 
 
@@ -47,31 +48,40 @@ def parse_cmd_line():
     Commandline options arguments parsing.
     """
 
-    version = "%%prog %s" % (__version__)
+    version = "%%prog %s" % __version__
     parser = OptionParser(version=version)
-    parser.add_option("-s", "--server", action="store", dest="server",
-                                            type="string",
-                                            default="", metavar="SERVER",
-                                            help="server name or address")
-    parser.add_option("-p", "--port", action="store", type="int", dest="port",
-                                            default=7634, metavar="PORT",
-                                            help="port number")
-    parser.add_option("-d", "--device", action="store", dest="device",
-                                            type="string", default="",
-                                            metavar="DEVICE", help="device name")
-    parser.add_option("-S", "--separator", action="store", type="string",
-                                            dest="separator", default="|",
-                                            metavar="SEPARATOR",
-                                            help="hddtemp separator")
-    parser.add_option("-w", "--warning", action="store", type="int",
-                            dest="warning", default=40, metavar="TEMP",
-                                            help="warning temperature")
-    parser.add_option("-c", "--critical", action="store", type="int",
-                            dest="critical", default=65, metavar="TEMP",
-                                            help="critical temperature")
-    parser.add_option("-q", "--quiet", metavar="QUIET", action="store_false",
-                                        default=False, dest="quiet",
-                                        help="be quiet")
+    parser.add_option(
+        "-s", "--server", action="store", dest="server",
+        type="string", default="", metavar="SERVER",
+        help="server name or address"
+    )
+    parser.add_option(
+        "-p", "--port", action="store", type="int", dest="port",
+        default=7634, metavar="PORT", help="port number"
+    )
+    parser.add_option(
+        "-d", "--device", action="store", dest="device", type="string", default="",
+        metavar="DEVICE", help="device name"
+    )
+    parser.add_option(
+        "-S", "--separator", action="store", type="string", dest="separator", default="|",
+        metavar="SEPARATOR", help="hddtemp separator"
+    )
+    parser.add_option(
+        "-w", "--warning", action="store", type="int", dest="warning",
+        default=40, metavar="TEMP", help="warning temperature"
+    )
+    parser.add_option(
+        "-c", "--critical", action="store", type="int", dest="critical",
+        default=65, metavar="TEMP", help="critical temperature"
+    )
+    parser.add_option(
+        "-t", "--timeout", action="store", type="int", dest="timeout", default=1, metavar="TIMEOUT",
+        help="receiving data from hddtemp network operation timeout"
+    )
+    parser.add_option(
+        "-q", "--quiet", metavar="QUIET", action="store_false", default=False, dest="quiet", help="be quiet"
+    )
 
     options = parser.parse_args(sys.argv)[0]
 
@@ -84,22 +94,20 @@ def parse_cmd_line():
     return options
 
 
-def get_hddtemp_data(server, port):
+def get_hddtemp_data(server, port, timeout):
     """
     Get and return data from hddtemp server response.
     """
 
-    _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _socket.setblocking(False)
-    try:
-        _socket.connect((server, port, ))
-    except socket.error:
-        sys.stderr.write("ERROR: Server communicating problem.\n")
-        _socket.close()
-        sys.exit(-1)
+    response = str()
 
-    response = _socket.recv(4096, socket.MSG_PEEK)
-    _socket.close()
+    try:
+        tn = telnetlib.Telnet(server, port, timeout)
+        response = tn.read_all()
+        tn.close()
+    except (EOFError, socket.error), err:
+        sys.stderr.write("ERROR: Server communicating problem. %s\n" % err)
+        sys.exit(-1)
 
     return response
 
@@ -112,39 +120,46 @@ def parse_response(response, device, separator):
     hdd_info_keys = ['hdd_model', 'temperature', 'scale', ]
     dev_info = {}
 
-    for dev in response.split(separator*2):
-        dev =  dev.strip(separator).split(separator)
-        if len(dev) != 4:
-            sys.stderr.write("ERROR: Server response parsing error.\n")
-            sys.exit(-1)
-        dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
+    response = response.split(separator * 2)
+    if response:
+        for dev in response:
+            dev = dev.strip(separator).split(separator)
+            if len(dev) != 4:
+                sys.stderr.write("ERROR: Server response for device %s parsing error.\n" % device)
+                sys.exit(-1)
+            dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
 
-    if device not in dev_info.keys():
-        sys.stderr.write("ERROR: Info about requested device not found in server response.\n")
-        sys.exit(0)
+        if device not in dev_info.keys():
+            sys.stderr.write("ERROR: Info about device %s not found in server response.\n" % device)
+            sys.exit(0)
+    else:
+        sys.stderr.write("ERROR: Server response too short.\n")
+        sys.exit(-1)
 
     return dev_info[device]
 
 
 def check_hddtemp(response, options):
     """
-    Return info about HDD statuses to Nagios.
+    Return info about HDD status to Nagios.
     """
 
     output_templates = {
-        'critical': "CRITICAL: device temperature (%(temperature)s%(scale)s) exceeds critical temperature threshold (%(critical)d%(scale)s)\n",
-        'warning': "WARNING: device temperature (%(temperature)s%(scale)s) exceeds warning temperature threshold (%(warning)d%(scale)s)\n",
-        'ok': "OK: device is functional and stable (%(temperature)s%(scale)s)\n",
+        'critical': "CRITICAL: device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s\n",
+        'warning': "WARNING: device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s\n",
+        'ok': "OK: device is functional and stable %(temperature)s%(scale)s\n",
     }
 
-    if int(response["temperature"]) > options.critical:
+    temperature = int(response["temperature"])
+
+    if temperature > options.critical:
         data = {
-            'temperature': response["temperature"],
+            'temperature': temperature,
             'critical': options.critical,
             'scale': response["scale"],
         }
         template = 'critical'
-    elif int(response["temperature"]) > options.warning and int(response["temperature"]) < options.critical:
+    elif all([temperature > options.warning, temperature < options.critical, ]):
         data = {
             'temperature': response["temperature"],
             'warning': options.warning,
@@ -162,4 +177,5 @@ def check_hddtemp(response, options):
 
 if __name__ == "__main__":
     options = parse_cmd_line()
-    check_hddtemp(parse_response(get_hddtemp_data(options.server, options.port), options.device, options.separator), options)
+    check_hddtemp(parse_response(get_hddtemp_data(options.server, options.port, options.timeout), options.device, options.separator), options)
+    sys.exit()
