@@ -38,7 +38,7 @@ __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
 __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
-VERSION = (0, 4, 0)
+VERSION = (0, 4, 1)
 __version__ = '.'.join(map(str, VERSION))
 
 
@@ -90,14 +90,15 @@ def get_hddtemp_data(server, port):
     """
 
     _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _socket.setblocking(False)
     try:
-        _socket.connect((server, port))
+        _socket.connect((server, port, ))
     except socket.error:
         sys.stderr.write("ERROR: Server communicating problem.\n")
         _socket.close()
         sys.exit(-1)
 
-    response = _socket.recv(4096)
+    response = _socket.recv(4096, socket.MSG_PEEK)
     _socket.close()
 
     return response
@@ -119,7 +120,7 @@ def parse_response(response, device, separator):
         dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
 
     if device not in dev_info.keys():
-        sys.stderr.write("ERROR: Info about requested device not founded in server response.\n")
+        sys.stderr.write("ERROR: Info about requested device not found in server response.\n")
         sys.exit(0)
 
     return dev_info[device]
