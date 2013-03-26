@@ -26,8 +26,8 @@
 import sys
 
 try:
-    import telnetlib
     import socket
+    import telnetlib
     from optparse import OptionParser
 except ImportError, err:
     sys.stderr.write("ERROR: Couldn't load module. %s\n" % err)
@@ -39,7 +39,7 @@ __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
 __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
-VERSION = (0, 4, 2)
+VERSION = (0, 4, )
 __version__ = '.'.join(map(str, VERSION))
 
 
