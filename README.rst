@@ -4,14 +4,14 @@
 A nagios-check-hddtemp documentation
 =============================
 
-    *nagios-check-hddtemp is a Nagios-plugin that that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
+    *nagios-check-hddtemp is a Nagios-plugin that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
 
 .. contents::
 
 Installation
 ------------
-* Obtain your copy of source code from git repository: ``git clone https://github.com/vint21h/nagios-check-hddtemp.git``. Or download latest release from https://github.com/vint21h/nagios-check-hddtemp/downloads.
-* Run ``./setup.py install`` from repository source tree or unpacked archive under root user.
+* Obtain your copy of source code from git repository: ``git clone https://github.com/vint21h/nagios-check-hddtemp.git``. Or download latest release from https://github.com/vint21h/nagios-check-hddtemp/tags.
+* Run ``python ./setup.py install`` from repository source tree or unpacked archive under root user.
 
 Configuration
 -------------
@@ -28,7 +28,7 @@ Configuration
             command_line $CH$ -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
         }
 
-    # 'example' service
+    # 'check_hddtemp' service for /dev/sda
     define service
     {
         use                 local-service
@@ -39,6 +39,6 @@ Configuration
 
 Contacts
 --------
-**Project Website**: https://github.com/vint21h/nagios-check-hddtemp
+**Project website**: https://github.com/vint21h/nagios-check-hddtemp
 
 **Author**: Alexei Andrushievich <vint21h@vint21h.pp.ua>
