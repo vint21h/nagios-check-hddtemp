@@ -29,9 +29,12 @@ try:
     import socket
     import telnetlib
     from optparse import OptionParser
+    from string import strip
 except ImportError, err:
     sys.stderr.write("ERROR: Couldn't load module. %s\n" % err)
     sys.exit(-1)
+
+__all__ = ['parse_options', 'get_response', 'parse_response', 'check_hddtemp', 'main', ]
 
 # metadata
 __author__ = "Alexei Andrushievich"
@@ -44,10 +47,22 @@ __version__ = '.'.join(map(str, VERSION))
 
 # global variables
 OUTPUT_TEMPLATES = {
-    'critical': "CRITICAL: device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s\n",
-    'warning': "WARNING: device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s\n",
-    'ok': "OK: device is functional and stable %(temperature)s%(scale)s\n",
-    'unknown': "UNKNOWN: device %s temperature info not found in server response"
+    'critical': {
+        'text': "device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s",
+        'priority': 1,
+    },
+    'warning': {
+        'text': "device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s",
+        'priority': 2,
+    },
+    'unknown': {
+        'text': "device %s temperature info not found in server response",
+        'priority': 3,
+    },
+    'ok': {
+        'text': "device is functional and stable %(temperature)s%(scale)s",
+        'priority': 4,
+    },
 }
 
 
@@ -97,12 +112,12 @@ def parse_options():
     mandatories = ["server", ]
     if not all(options.__dict__[mandatory] for mandatory in mandatories):
         sys.stderr.write("Mandatory command line option missing.\n")
-        exit(0)
+        sys.exit(0)
 
     return options
 
 
-def get_hddtemp_data(options):
+def get_response(options):
     """
     Get and return data from hddtemp server response.
     """
@@ -149,46 +164,60 @@ def check_hddtemp(response, options):
     """
 
     devices_states = dict()
-    if options.devices:
-        pass
-    else:
-        pass
 
-    #
-    # temperature = int(response["temperature"])
-    #
-    # if temperature > options.critical:
-    #     data = {
-    #         'temperature': temperature,
-    #         'critical': options.critical,
-    #         'scale': response["scale"],
-    #     }
-    #     template = 'critical'
-    # elif all([temperature > options.warning, temperature < options.critical, ]):
-    #     data = {
-    #         'temperature': response["temperature"],
-    #         'warning': options.warning,
-    #         'scale': response["scale"],
-    #     }
-    #     template = 'warning'
-    # else:
-    #     data = {
-    #         'temperature': response["temperature"],
-    #         'scale': response["scale"],
-    #     }
-    #     template = 'ok'
-    #
+    if options.devices:
+        devices = map(strip, options.devices.strip().split(','))
+    else:
+        devices = response.keys()
+
+    for device in devices:
+        if device:  # not empty string
+            try:
+                device_data = response[device]
+            except KeyError:  # device not found in hddtemp response
+                devices_states.update({
+                    device: {
+                        'template': 'unknown',
+                        'temperature': None,
+                        'scale': None,
+                    }
+                })
+                continue
+
+            # checking temperature
+            temperature = int(device_data["temperature"])
+
+            if temperature > options.critical:
+                template = 'critical'
+            elif all([temperature > options.warning, temperature < options.critical, ]):
+                template = 'warning'
+            else:
+                template = 'ok'
+
+            devices_states.update({
+                device: {
+                    'template': template,
+                    'data': {
+                        'temperature': temperature,
+                        'scale': device_data["scale"],
+                        'warning': options.warning,
+                        'critical': options.critical,
+                    }
+                }
+            })
+
+    return ''
     # sys.stdout.write(OUTPUT_TEMPLATES[template] % data)
 
 
 def main():
     """
-    Program entry point.
+    Program main.
     """
 
     options = parse_options()
-    check_hddtemp(parse_response(get_hddtemp_data(options), options), options)
-    sys.exit()
+    sys.stdout.write(check_hddtemp(parse_response(get_response(options), options), options))
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
