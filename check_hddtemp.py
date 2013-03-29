@@ -42,8 +42,16 @@ __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
 VERSION = (0, 4, 3)
 __version__ = '.'.join(map(str, VERSION))
 
+# global variables
+OUTPUT_TEMPLATES = {
+    'critical': "CRITICAL: device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s\n",
+    'warning': "WARNING: device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s\n",
+    'ok': "OK: device is functional and stable %(temperature)s%(scale)s\n",
+    'unknown': "UNKNOWN: device %s temperature info not found in server response"
+}
 
-def parse_cmd_line():
+
+def parse_options():
     """
     Commandline options arguments parsing.
     """
@@ -60,8 +68,8 @@ def parse_cmd_line():
         default=7634, metavar="PORT", help="port number"
     )
     parser.add_option(
-        "-d", "--device", action="store", dest="device", type="string", default="",
-        metavar="DEVICE", help="device name"
+        "-d", "--devices", action="store", dest="devices", type="string", default="",
+        metavar="DEVICES", help="comma separated devices list, or empty for all devices in hddtemp response"
     )
     parser.add_option(
         "-S", "--separator", action="store", type="string", dest="separator", default="|",
@@ -86,7 +94,7 @@ def parse_cmd_line():
     options = parser.parse_args(sys.argv)[0]
 
     # check mandatory command line options supplied
-    mandatories = ["server", "device", ]
+    mandatories = ["server", ]
     if not all(options.__dict__[mandatory] for mandatory in mandatories):
         sys.stderr.write("Mandatory command line option missing.\n")
         exit(0)
@@ -94,7 +102,7 @@ def parse_cmd_line():
     return options
 
 
-def get_hddtemp_data(server, port, timeout):
+def get_hddtemp_data(options):
     """
     Get and return data from hddtemp server response.
     """
@@ -102,7 +110,7 @@ def get_hddtemp_data(server, port, timeout):
     response = str()
 
     try:
-        tn = telnetlib.Telnet(server, port, timeout)
+        tn = telnetlib.Telnet(options.server, options.port, options.timeout)
         response = tn.read_all()
         tn.close()
     except (EOFError, socket.error), err:
@@ -112,31 +120,27 @@ def get_hddtemp_data(server, port, timeout):
     return response
 
 
-def parse_response(response, device, separator):
+def parse_response(response, options):
     """
     Search for device and get HDD info from server response.
     """
 
     hdd_info_keys = ['hdd_model', 'temperature', 'scale', ]
-    dev_info = {}
+    devices_info = {}
 
-    response = response.split(separator * 2)
+    response = response.split(options.separator * 2)
     if response:
         for dev in response:
-            dev = dev.strip(separator).split(separator)
+            dev = dev.strip(options.separator).split(options.separator)
             if len(dev) != 4:
-                sys.stderr.write("ERROR: Server response for device %s parsing error.\n" % device)
+                sys.stderr.write("ERROR: Server response for device %s parsing error.\n" % dev)
                 sys.exit(-1)
-            dev_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
-
-        if device not in dev_info.keys():
-            sys.stderr.write("ERROR: Info about device %s not found in server response.\n" % device)
-            sys.exit(0)
+            devices_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
     else:
         sys.stderr.write("ERROR: Server response too short.\n")
         sys.exit(-1)
 
-    return dev_info[device]
+    return devices_info
 
 
 def check_hddtemp(response, options):
@@ -144,38 +148,47 @@ def check_hddtemp(response, options):
     Return info about HDD status to Nagios.
     """
 
-    output_templates = {
-        'critical': "CRITICAL: device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s\n",
-        'warning': "WARNING: device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s\n",
-        'ok': "OK: device is functional and stable %(temperature)s%(scale)s\n",
-    }
-
-    temperature = int(response["temperature"])
-
-    if temperature > options.critical:
-        data = {
-            'temperature': temperature,
-            'critical': options.critical,
-            'scale': response["scale"],
-        }
-        template = 'critical'
-    elif all([temperature > options.warning, temperature < options.critical, ]):
-        data = {
-            'temperature': response["temperature"],
-            'warning': options.warning,
-            'scale': response["scale"],
-        }
-        template = 'warning'
+    devices_states = dict()
+    if options.devices:
+        pass
     else:
-        data = {
-            'temperature': response["temperature"],
-            'scale': response["scale"],
-        }
-        template = 'ok'
+        pass
 
-    sys.stdout.write(output_templates[template] % data)
+    #
+    # temperature = int(response["temperature"])
+    #
+    # if temperature > options.critical:
+    #     data = {
+    #         'temperature': temperature,
+    #         'critical': options.critical,
+    #         'scale': response["scale"],
+    #     }
+    #     template = 'critical'
+    # elif all([temperature > options.warning, temperature < options.critical, ]):
+    #     data = {
+    #         'temperature': response["temperature"],
+    #         'warning': options.warning,
+    #         'scale': response["scale"],
+    #     }
+    #     template = 'warning'
+    # else:
+    #     data = {
+    #         'temperature': response["temperature"],
+    #         'scale': response["scale"],
+    #     }
+    #     template = 'ok'
+    #
+    # sys.stdout.write(OUTPUT_TEMPLATES[template] % data)
+
+
+def main():
+    """
+    Program entry point.
+    """
+
+    options = parse_options()
+    check_hddtemp(parse_response(get_hddtemp_data(options), options), options)
+    sys.exit()
 
 if __name__ == "__main__":
-    options = parse_cmd_line()
-    check_hddtemp(parse_response(get_hddtemp_data(options.server, options.port, options.timeout), options.device, options.separator), options)
-    sys.exit()
+    main()
