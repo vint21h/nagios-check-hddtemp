@@ -2,7 +2,7 @@
 .. README.rst
 
 A nagios-check-hddtemp documentation
-=============================
+====================================
 
     *nagios-check-hddtemp is a Nagios-plugin that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
 
@@ -36,6 +36,15 @@ Configuration
         service_description HDD Temperature /dev/sda
         check_command       check_hddtemp!127.0.0.1!7634!/dev/sda!40!50
     }
+
+Without ``--devices`` option script check all devices from hddtemp response and return priority based global status:
+
+* critical
+* warning
+* unknown
+* ok
+
+Also, ``--devices`` option can take comma separated list of devices to check.
 
 Licensing
 ---------
