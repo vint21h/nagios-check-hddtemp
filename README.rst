@@ -37,6 +37,11 @@ Configuration
         check_command       check_hddtemp!127.0.0.1!7634!/dev/sda!40!50
     }
 
+Licensing
+---------
+nagios-check-hddtemp is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+For complete license text see COPYING file.
+
 Contacts
 --------
 **Project website**: https://github.com/vint21h/nagios-check-hddtemp

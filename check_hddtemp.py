@@ -42,7 +42,7 @@ __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
 __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
-VERSION = (0, 5, 0)
+VERSION = (0, 5, 1)
 __version__ = '.'.join(map(str, VERSION))
 
 # global variables
