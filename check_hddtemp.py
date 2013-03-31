@@ -34,7 +34,7 @@ except ImportError, err:
     sys.stderr.write("ERROR: Couldn't load module. %s\n" % err)
     sys.exit(-1)
 
-__all__ = ['parse_options', 'get_response', 'parse_response', 'check_hddtemp', 'main', ]
+__all__ = ['parse_options', 'get_response', 'parse_response', 'check_hddtemp', 'create_output', 'main', ]
 
 # metadata
 __author__ = "Alexei Andrushievich"
@@ -42,25 +42,25 @@ __email__ = "vint21h@vint21h.pp.ua"
 __licence__ = "GPLv3 or later"
 __description__ = "Check HDD temperature Nagios plugin"
 __url__ = "https://github.com/vint21h/nagios-check-hddtemp"
-VERSION = (0, 4, 3)
+VERSION = (0, 5, 0)
 __version__ = '.'.join(map(str, VERSION))
 
 # global variables
 OUTPUT_TEMPLATES = {
     'critical': {
-        'text': "device temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s",
+        'text': "device %(device)s temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s",
         'priority': 1,
     },
     'warning': {
-        'text': "device temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s",
+        'text': "device %(device)s temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s",
         'priority': 2,
     },
     'unknown': {
-        'text': "device %s temperature info not found in server response",
+        'text': "device %(device)s temperature info not found in server response",
         'priority': 3,
     },
     'ok': {
-        'text': "device is functional and stable %(temperature)s%(scale)s",
+        'text': "device %(device)s is functional and stable %(temperature)s%(scale)s",
         'priority': 4,
     },
 }
@@ -92,27 +92,29 @@ def parse_options():
     )
     parser.add_option(
         "-w", "--warning", action="store", type="int", dest="warning",
-        default=40, metavar="TEMP", help="warning temperature"
+        default=40, metavar="TEMPERATURE", help="warning temperature"
     )
     parser.add_option(
         "-c", "--critical", action="store", type="int", dest="critical",
-        default=65, metavar="TEMP", help="critical temperature"
+        default=65, metavar="TEMPERATURE", help="critical temperature"
     )
     parser.add_option(
         "-t", "--timeout", action="store", type="int", dest="timeout", default=1, metavar="TIMEOUT",
-        help="receiving data from hddtemp network operation timeout"
+        help="receiving data from hddtemp operation network timeout"
     )
     parser.add_option(
-        "-q", "--quiet", metavar="QUIET", action="store_false", default=False, dest="quiet", help="be quiet"
+        "-q", "--quiet", metavar="QUIET", action="store_true", default=False, dest="quiet", help="be quiet"
     )
 
     options = parser.parse_args(sys.argv)[0]
 
     # check mandatory command line options supplied
-    mandatories = ["server", ]
-    if not all(options.__dict__[mandatory] for mandatory in mandatories):
-        sys.stderr.write("Mandatory command line option missing.\n")
-        sys.exit(0)
+    if not options.server:
+        parser.error("Required server address option missing")
+
+    # check if waning temperature in args less than critical
+    if options.warning >= options.critical:
+        parser.error("Warning temperature option value must be less then critical option value")
 
     return options
 
@@ -129,7 +131,8 @@ def get_response(options):
         response = tn.read_all()
         tn.close()
     except (EOFError, socket.error), err:
-        sys.stderr.write("ERROR: Server communicating problem. %s\n" % err)
+        if not options.quiet:
+            sys.stderr.write("ERROR: Server communicating problem. %s\n" % err)
         sys.exit(-1)
 
     return response
@@ -140,27 +143,29 @@ def parse_response(response, options):
     Search for device and get HDD info from server response.
     """
 
-    hdd_info_keys = ['hdd_model', 'temperature', 'scale', ]
-    devices_info = {}
+    data_keys = ['hdd_model', 'temperature', 'scale', ]
+    data = {}
 
     response = response.split(options.separator * 2)
     if response:
         for dev in response:
             dev = dev.strip(options.separator).split(options.separator)
             if len(dev) != 4:
-                sys.stderr.write("ERROR: Server response for device %s parsing error.\n" % dev)
+                if not options.quiet:
+                    sys.stderr.write("ERROR: Server response for device %s parsing error\n" % dev)
                 sys.exit(-1)
-            devices_info.update({dev[0]: dict(zip(hdd_info_keys, dev[1:]))})
+            data.update({dev[0]: dict(zip(data_keys, dev[1:]))})
     else:
-        sys.stderr.write("ERROR: Server response too short.\n")
+        if not options.quiet:
+            sys.stderr.write("ERROR: Server response too short\n")
         sys.exit(-1)
 
-    return devices_info
+    return data
 
 
-def check_hddtemp(response, options):
+def check_hddtemp(data, options):
     """
-    Return info about HDD status to Nagios.
+    Create devices statuses info.
     """
 
     devices_states = dict()
@@ -168,18 +173,23 @@ def check_hddtemp(response, options):
     if options.devices:
         devices = map(strip, options.devices.strip().split(','))
     else:
-        devices = response.keys()
+        devices = data.keys()
 
     for device in devices:
         if device:  # not empty string
             try:
-                device_data = response[device]
+                device_data = data[device]
             except KeyError:  # device not found in hddtemp response
                 devices_states.update({
                     device: {
                         'template': 'unknown',
-                        'temperature': None,
-                        'scale': None,
+                        'data': {
+                            'device': device,
+                            'temperature': None,
+                            'scale': None,
+                            'warning': None,
+                            'critical': None,
+                        }
                     }
                 })
                 continue
@@ -198,6 +208,7 @@ def check_hddtemp(response, options):
                 device: {
                     'template': template,
                     'data': {
+                        'device': device,
                         'temperature': temperature,
                         'scale': device_data["scale"],
                         'warning': options.warning,
@@ -206,8 +217,22 @@ def check_hddtemp(response, options):
                 }
             })
 
-    return ''
-    # sys.stdout.write(OUTPUT_TEMPLATES[template] % data)
+    return devices_states
+
+
+def create_output(data):
+    """
+    Create Nagios and human readable hdd's statuses.
+    """
+
+    # getting main status for check (for multiple check need to get main status by priority)
+    status = [status[0] for status in sorted([(status, OUTPUT_TEMPLATES[status]['priority']) for status in list(set([data[d]['template'] for d in data.keys()]))], key=lambda x: x[1])][0]
+
+    # return full status string with main status for multiple devices and all devices states
+    return "%(status)s: %(data)s\n" % {
+        'status': status.upper(),
+        'data': ', '.join([OUTPUT_TEMPLATES[data[d]['template']]['text'] % data[d]['data'] for d in data.keys()]),
+    }
 
 
 def main():
@@ -216,7 +241,7 @@ def main():
     """
 
     options = parse_options()
-    sys.stdout.write(check_hddtemp(parse_response(get_response(options), options), options))
+    sys.stdout.write(create_output(check_hddtemp(parse_response(get_response(options), options), options)))
     sys.exit(0)
 
 if __name__ == "__main__":
