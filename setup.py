@@ -28,5 +28,5 @@ setup(
     license=__licence__,
     url=__url__,
     zip_safe=False,
-    include_package_data=True,
+    include_package_data=True
 )
