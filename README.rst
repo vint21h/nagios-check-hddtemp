@@ -16,7 +16,6 @@ Installation
 Configuration
 -------------
 * Read and understand Nagios documentation.
-* Add Nagios variable ``$CH$=/usr/bin/check_hddtemp.py``
 * Create Nagios command and service definitions like this:
 
 ::
@@ -25,7 +24,7 @@ Configuration
         define command
         {
             command_name check_hddtemp
-            command_line $CH$ -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
+            command_line /usr/bin/check_hddtemp.py -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
         }
 
     # 'check_hddtemp' service for /dev/sda
