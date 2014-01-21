@@ -5,7 +5,7 @@
 # nagios-check-hddtemp
 # check_hddtemp.py
 
-# Copyright (c) 2011-2012 Alexei Andrushievich <vint21h@vint21h.pp.ua>
+# Copyright (c) 2011-2014 Alexei Andrushievich <vint21h@vint21h.pp.ua>
 # Check HDD temperature Nagios plugin [https://github.com/vint21h/nagios-check-hddtemp]
 #
 # This file is part of nagios-check-hddtemp.
@@ -37,7 +37,7 @@ except ImportError, err:
 __all__ = ['main', ]
 
 # metadata
-VERSION = (0, 5, 5)
+VERSION = (0, 5, 6)
 __version__ = '.'.join(map(str, VERSION))
 
 # global variables
