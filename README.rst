@@ -24,7 +24,7 @@ Configuration
         define command
         {
             command_name check_hddtemp
-            command_line /usr/bin/check_hddtemp.py -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
+            command_line $USER1$/check_hddtemp -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
         }
 
     # 'check_hddtemp' service for /dev/sda
