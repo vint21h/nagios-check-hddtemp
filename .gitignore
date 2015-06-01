@@ -1,3 +1,6 @@
+# nagios-check-hddtemp
+# .gitignore
+
 .*.swp
 *.pyc
 *.pyo
