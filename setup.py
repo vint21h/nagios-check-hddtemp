@@ -4,31 +4,32 @@
 # nagios-check-hddtemp
 # setup.py
 
+from __future__ import unicode_literals
 from setuptools import setup, find_packages
 
-VERSION = (0, 5, 7)
-__version__ = '.'.join(map(str, VERSION))
+VERSION = (0, 6, 0)
+__version__ = ".".join(map(str, VERSION))
 
-DATA = ['README.rst', 'COPYING', ]
+DATA = ["README.rst", "COPYING", "AUTHORS", ]
 
 setup(
     name="nagios-check-hddtemp",
     version=__version__,
     packages=find_packages(),
-    scripts=['check_hddtemp.py', ],
+    scripts=["check_hddtemp.py", ],
     package_data={
-        'nagios-check-hddtemp': DATA,
+        "nagios-check-hddtemp": DATA,
     },
     data_files=[
-        ('share/doc/nagios-check-hddtemp/', DATA),
+        ("share/doc/nagios-check-hddtemp/", DATA),
     ],
     author="Alexei Andrushievich",
     author_email="vint21h@vint21h.pp.ua",
     description="Check HDD temperature Nagios plugin",
-    long_description=open('README.rst').read(),
+    long_description=open("README.rst").read(),
     license="GPLv3 or later",
     url="https://github.com/vint21h/nagios-check-hddtemp",
-    download_url="https://github.com/vint21h/nagios-check-hddtemp/archive/%s.tar.gz" % __version__,
+    download_url="https://github.com/vint21h/nagios-check-hddtemp/archive/{version}.tar.gz".format(version=__version__),
     zip_safe=False,
     include_package_data=True,
     classifiers=[

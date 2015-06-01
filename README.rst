@@ -20,14 +20,14 @@ Configuration
 
 ::
 
-    # 'check_hddtemp' command
+    # "check_hddtemp" command
         define command
         {
             command_name check_hddtemp
             command_line $USER1$/check_hddtemp -s $ARG1$ -p $ARG2$ -d $ARG3$ -w $ARG4$ -c $ARG4$
         }
 
-    # 'check_hddtemp' service for /dev/sda
+    # "check_hddtemp" service for /dev/sda
     define service
     {
         use                 local-service
@@ -55,3 +55,5 @@ Contacts
 **Project website**: https://github.com/vint21h/nagios-check-hddtemp
 
 **Author**: Alexei Andrushievich <vint21h@vint21h.pp.ua>
+
+For other authors list see AUTHORS file.

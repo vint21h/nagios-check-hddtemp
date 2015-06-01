@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import sys
 
 try:
@@ -30,32 +31,32 @@ try:
     import telnetlib
     from optparse import OptionParser
     from string import strip
-except ImportError, err:
-    sys.stderr.write(u"ERROR: Couldn't load module. %s\n" % err)
+except (ImportError, ), err:
+    sys.stderr.write("ERROR: Couldn't load module. {err}\n".format(err=err))
     sys.exit(-1)
 
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 5, 7)
+VERSION = (0, 6, 0)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
 OUTPUT_TEMPLATES = {
     "critical": {
-        "text": u"device %(device)s temperature %(temperature)s%(scale)s exceeds critical temperature threshold %(critical)d%(scale)s",
+        "text": "device {device} temperature {temperature}{scale} exceeds critical temperature threshold {critical}{scale}",
         "priority": 1,
     },
     "warning": {
-        "text": u"device %(device)s temperature %(temperature)s%(scale)s exceeds warning temperature threshold %(warning)d%(scale)s",
+        "text": "device {device} temperature {temperature}{scale} exceeds warning temperature threshold {warning}{scale}",
         "priority": 2,
     },
     "unknown": {
-        "text": u"device %(device)s temperature info not found in server response",
+        "text": "device {device} temperature info not found in server response",
         "priority": 3,
     },
     "ok": {
-        "text": u"device %(device)s is functional and stable %(temperature)s%(scale)s",
+        "text": "device {device} is functional and stable {temperature}{scale}",
         "priority": 4,
     },
 }
@@ -66,50 +67,50 @@ def parse_options():
     Commandline options arguments parsing.
     """
 
-    version = "%%prog %s" % __version__
+    version = "%%prog {version}".format(version=__version__)
     parser = OptionParser(version=version)
     parser.add_option(
         "-s", "--server", action="store", dest="server",
         type="string", default="", metavar="SERVER",
-        help=u"server name or address"
+        help="server name or address"
     )
     parser.add_option(
         "-p", "--port", action="store", type="int", dest="port",
-        default=7634, metavar="PORT", help=u"port number"
+        default=7634, metavar="PORT", help="port number"
     )
     parser.add_option(
         "-d", "--devices", action="store", dest="devices", type="string", default="",
-        metavar="DEVICES", help=u"comma separated devices list, or empty for all devices in hddtemp response"
+        metavar="DEVICES", help="comma separated devices list, or empty for all devices in hddtemp response"
     )
     parser.add_option(
         "-S", "--separator", action="store", type="string", dest="separator", default="|",
-        metavar="SEPARATOR", help=u"hddtemp separator"
+        metavar="SEPARATOR", help="hddtemp separator"
     )
     parser.add_option(
         "-w", "--warning", action="store", type="int", dest="warning",
-        default=40, metavar="TEMPERATURE", help=u"warning temperature"
+        default=40, metavar="TEMPERATURE", help="warning temperature"
     )
     parser.add_option(
         "-c", "--critical", action="store", type="int", dest="critical",
-        default=65, metavar="TEMPERATURE", help=u"critical temperature"
+        default=65, metavar="TEMPERATURE", help="critical temperature"
     )
     parser.add_option(
         "-t", "--timeout", action="store", type="int", dest="timeout", default=1, metavar="TIMEOUT",
-        help=u"receiving data from hddtemp operation network timeout"
+        help="receiving data from hddtemp operation network timeout"
     )
     parser.add_option(
-        "-q", "--quiet", metavar="QUIET", action="store_true", default=False, dest="quiet", help=u"be quiet"
+        "-q", "--quiet", metavar="QUIET", action="store_true", default=False, dest="quiet", help="be quiet"
     )
 
     options = parser.parse_args(sys.argv)[0]
 
     # check mandatory command line options supplied
     if not options.server:
-        parser.error(u"Required server address option missing")
+        parser.error("Required server address option missing")
 
     # check if waning temperature in args less than critical
     if options.warning >= options.critical:
-        parser.error(u"Warning temperature option value must be less then critical option value")
+        parser.error("Warning temperature option value must be less then critical option value")
 
     return options
 
@@ -125,9 +126,9 @@ def get_response(options):
         tn = telnetlib.Telnet(options.server, options.port, options.timeout)
         response = tn.read_all()
         tn.close()
-    except (EOFError, socket.error), error:
+    except (EOFError, socket.error, ), err:
         if not options.quiet:
-            sys.stderr.write(u"ERROR: Server communication problem. %s\n" % error)
+            sys.stderr.write("ERROR: Server communication problem. {err}\n".format(err=err))
         sys.exit(-1)
 
     return response
@@ -147,12 +148,12 @@ def parse_response(response, options):
             dev = dev.strip(options.separator).split(options.separator)
             if len(dev) != 4:
                 if not options.quiet:
-                    sys.stderr.write(u"ERROR: Server response for device %s parsing error\n" % dev)
+                    sys.stderr.write("ERROR: Server response for device '{dev}' parsing error\n".format(dev=dev))
                 sys.exit(-1)
             data.update({dev[0]: dict(zip(data_keys, dev[1:]))})
     else:
         if not options.quiet:
-            sys.stderr.write(u"ERROR: Server response too short\n")
+            sys.stderr.write("ERROR: Server response too short\n")
         sys.exit(-1)
 
     return data
@@ -166,7 +167,7 @@ def check_hddtemp(data, options):
     devices_states = dict()
 
     if options.devices:
-        devices = map(strip, options.devices.strip().split(u","))
+        devices = map(strip, options.devices.strip().split(","))
     else:
         devices = data.keys()
 
@@ -224,10 +225,10 @@ def create_output(data):
     status = [status[0] for status in sorted([(status, OUTPUT_TEMPLATES[status]["priority"]) for status in list(set([data[d]["template"] for d in data.keys()]))], key=lambda x: x[1])][0]
 
     # return full status string with main status for multiple devices and all devices states
-    return u"%(status)s: %(data)s\n" % {
+    return "{status}: {data}\n".format(**{
         "status": status.upper(),
-        "data": u", ".join([OUTPUT_TEMPLATES[data[d]["template"]]["text"] % data[d]["data"] for d in data.keys()]),
-    }
+        "data": ", ".join([OUTPUT_TEMPLATES[data[d]["template"]]["text"].format(**data[d]["data"]) for d in data.keys()]),
+    })
 
 
 def main():
