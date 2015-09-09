@@ -7,7 +7,7 @@
 
 Summary: Check HDD temperature Nagios plugin
 Name: nagios-plugins-check-hddtemp
-Version: 0.6.0
+Version: 0.7.0
 Release: 1%{?dist}
 Source0: %{original_name}-%{version}.tar.gz
 License: GPLv3 or later
@@ -34,6 +34,9 @@ install -p -m 755 check_hddtemp.py %{buildroot}%{_libdir}/nagios/plugins/check_h
 %{_libdir}/nagios/plugins/check_hddtemp
 
 %changelog
+* Wed Sep 9 2015 Alexei Andrushievich <vint21h@vint21h.pp.ua> - 0.7.0-1
+- Update to new version
+
 * Mon Jun 1 2015 Alexei Andrushievich <vint21h@vint21h.pp.ua> - 0.6.0-1
 - Update to new version
 
