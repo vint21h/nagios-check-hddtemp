@@ -31,14 +31,14 @@ try:
     import telnetlib
     from optparse import OptionParser
     from string import strip
-except (ImportError, ), err:
-    sys.stderr.write("ERROR: Couldn't load module. {err}\n".format(err=err))
+except (ImportError, ), error:
+    sys.stderr.write("ERROR: Couldn't load module. {error}\n".format(error=error))
     sys.exit(-1)
 
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 6, 0)
+VERSION = (0, 7, 0)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
@@ -59,6 +59,11 @@ OUTPUT_TEMPLATES = {
         "text": "device {device} is functional and stable {temperature}{scale}",
         "priority": 4,
     },
+}
+EXIT_CODES = {
+    "ok": 0,
+    "warning": 1,
+    "critical": 2,
 }
 
 
@@ -126,9 +131,9 @@ def get_response(options):
         tn = telnetlib.Telnet(options.server, options.port, options.timeout)
         response = tn.read_all()
         tn.close()
-    except (EOFError, socket.error, ), err:
+    except (EOFError, socket.error, ), error:
         if not options.quiet:
-            sys.stderr.write("ERROR: Server communication problem. {err}\n".format(err=err))
+            sys.stderr.write("ERROR: Server communication problem. {error}\n".format(error=error))
         sys.exit(-1)
 
     return response
@@ -224,11 +229,13 @@ def create_output(data):
     # getting main status for check (for multiple check need to get main status by priority)
     status = [status[0] for status in sorted([(status, OUTPUT_TEMPLATES[status]["priority"]) for status in list(set([data[d]["template"] for d in data.keys()]))], key=lambda x: x[1])][0]
 
+    code = EXIT_CODES.get(status, 3)  # create exit code
+
     # return full status string with main status for multiple devices and all devices states
     return "{status}: {data}\n".format(**{
         "status": status.upper(),
         "data": ", ".join([OUTPUT_TEMPLATES[data[d]["template"]]["text"].format(**data[d]["data"]) for d in data.keys()]),
-    })
+    }), code
 
 
 def main():
@@ -237,8 +244,9 @@ def main():
     """
 
     options = parse_options()
-    sys.stdout.write(create_output(check_hddtemp(parse_response(get_response(options), options), options)))
-    sys.exit(0)
+    output, code = create_output(check_hddtemp(parse_response(get_response(options), options), options))
+    sys.stdout.write(output)
+    sys.exit(code)
 
 if __name__ == "__main__":
 
