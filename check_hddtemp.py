@@ -65,6 +65,7 @@ EXIT_CODES = {
     "warning": 1,
     "critical": 2,
 }
+PERFORMANCE_DATA_TEMPLATE = u"{device}={temperature}"
 
 
 def parse_options():
@@ -104,7 +105,10 @@ def parse_options():
         help="receiving data from hddtemp operation network timeout"
     )
     parser.add_option(
-        "-q", "--quiet", metavar="QUIET", action="store_true", default=False, dest="quiet", help="be quiet"
+        "-P", "--performance-data", action="store_true", default=False, dest="performance", help="return performance data"
+    )
+    parser.add_option(
+        "-q", "--quiet", action="store_true", default=False, dest="quiet", help="be quiet"
     )
 
     options = parser.parse_args(sys.argv)[0]
@@ -125,7 +129,7 @@ def get_response(options):
     Get and return data from hddtemp server response.
     """
 
-    response = str()
+    response = u""
 
     try:
         tn = telnetlib.Telnet(options.server, options.port, options.timeout)
@@ -221,21 +225,32 @@ def check_hddtemp(data, options):
     return devices_states
 
 
-def create_output(data):
+def create_output(data, options):
     """
     Create Nagios and human readable hdd's statuses.
     """
 
+    output = u""
+
     # getting main status for check (for multiple check need to get main status by priority)
     status = [status[0] for status in sorted([(status, OUTPUT_TEMPLATES[status]["priority"]) for status in list(set([data[d]["template"] for d in data.keys()]))], key=lambda x: x[1])][0]
-
     code = EXIT_CODES.get(status, 3)  # create exit code
+    devices = ", ".join([OUTPUT_TEMPLATES[data[d]["template"]]["text"].format(**data[d]["data"]) for d in data.keys()])
 
-    # return full status string with main status for multiple devices and all devices states
-    return "{status}: {data}\n".format(**{
-        "status": status.upper(),
-        "data": ", ".join([OUTPUT_TEMPLATES[data[d]["template"]]["text"].format(**data[d]["data"]) for d in data.keys()]),
-    }), code
+    # create full status string with main status for multiple devices and all devices states with performance data (optional)
+    if options.performance:
+        output = "{status}: {data} | {performance-data}\n".format(**{
+            "status": status.upper(),
+            "data": devices,
+            "performance-data": "; ".join([PERFORMANCE_DATA_TEMPLATE.format(**data[d]["data"]) for d in data.keys()])
+        })
+    else:
+        output = "{status}: {data}\n".format(**{
+            "status": status.upper(),
+            "data": devices,
+        })
+
+    return output, code
 
 
 def main():
@@ -244,7 +259,7 @@ def main():
     """
 
     options = parse_options()
-    output, code = create_output(check_hddtemp(parse_response(get_response(options), options), options))
+    output, code = create_output(check_hddtemp(parse_response(get_response(options), options), options), options)
     sys.stdout.write(output)
     sys.exit(code)
 
