@@ -65,7 +65,7 @@ EXIT_CODES = {
     "warning": 1,
     "critical": 2,
 }
-PERFORMANCE_DATA_TEMPLATE = u"{device}={temperature}"
+PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 
 
 def parse_options():
@@ -129,7 +129,7 @@ def get_response(options):
     Get and return data from hddtemp server response.
     """
 
-    response = u""
+    response = ""
 
     try:
         tn = telnetlib.Telnet(options.server, options.port, options.timeout)
@@ -230,7 +230,7 @@ def create_output(data, options):
     Create Nagios and human readable hdd's statuses.
     """
 
-    output = u""
+    output = ""
 
     # getting main status for check (for multiple check need to get main status by priority)
     status = [status[0] for status in sorted([(status, OUTPUT_TEMPLATES[status]["priority"]) for status in list(set([data[d]["template"] for d in data.keys()]))], key=lambda x: x[1])][0]
