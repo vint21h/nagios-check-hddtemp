@@ -44,6 +44,7 @@ Without ``--devices`` option script check all devices from hddtemp response and 
 * ok
 
 Also, ``--devices`` option can take comma separated list of devices to check.
+
 If you want receive devices performance data, add ``-P`` argument to ``command_line``.
 
 Licensing
