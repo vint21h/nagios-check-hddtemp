@@ -5,7 +5,7 @@
 # nagios-check-hddtemp
 # check_hddtemp.py
 
-# Copyright (c) 2011-2015 Alexei Andrushievich <vint21h@vint21h.pp.ua>
+# Copyright (c) 2011-2016 Alexei Andrushievich <vint21h@vint21h.pp.ua>
 # Check HDD temperature Nagios plugin [https://github.com/vint21h/nagios-check-hddtemp]
 #
 # This file is part of nagios-check-hddtemp.
@@ -31,14 +31,14 @@ try:
     import telnetlib
     from optparse import OptionParser
     from string import strip
-except (ImportError, ), error:
+except ImportError, error:
     sys.stderr.write("ERROR: Couldn't load module. {error}\n".format(error=error))
     sys.exit(-1)
 
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 8, 1)
+VERSION = (0, 8, 2)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
@@ -137,8 +137,8 @@ def get_response(options):
         tn.close()
     except (EOFError, socket.error, ), error:
         if not options.quiet:
-            sys.stderr.write("ERROR: Server communication problem. {error}\n".format(error=error))
-        sys.exit(-1)
+            sys.stdout.write("ERROR: Server communication problem. {error}\n".format(error=error))
+        sys.exit(3)
 
     return response
 
@@ -157,13 +157,13 @@ def parse_response(response, options):
             dev = dev.strip(options.separator).split(options.separator)
             if len(dev) != 4:
                 if not options.quiet:
-                    sys.stderr.write("ERROR: Server response for device '{dev}' parsing error\n".format(dev=dev))
-                sys.exit(-1)
+                    sys.stdout.write("ERROR: Server response for device '{dev}' parsing error\n".format(dev=dev))
+                sys.exit(3)
             data.update({dev[0]: dict(zip(data_keys, dev[1:]))})
     else:
         if not options.quiet:
-            sys.stderr.write("ERROR: Server response too short\n")
-        sys.exit(-1)
+            sys.stdout.write("ERROR: Server response too short\n")
+        sys.exit(3)
 
     return data
 
