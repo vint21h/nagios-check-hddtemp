@@ -38,7 +38,7 @@ except ImportError, error:
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 8, 2)
+VERSION = (0, 9, 0)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
@@ -59,11 +59,16 @@ OUTPUT_TEMPLATES = {
         "text": "device {device} is functional and stable {temperature}{scale}",
         "priority": 4,
     },
+    "sleeping": {
+        "text": "device {device} is sleeping",
+        "priority": 5,
+    },
 }
 EXIT_CODES = {
     "ok": 0,
     "warning": 1,
     "critical": 2,
+    "sleeping": 0,
 }
 PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 
@@ -200,9 +205,14 @@ def check_hddtemp(data, options):
                 continue
 
             # checking temperature
-            temperature = int(device_data["temperature"])
+            try:
+                temperature = int(device_data["temperature"])
+            except ValueError:
+                temperature = device_data["temperature"]
 
-            if temperature > options.critical:
+            if temperature == "SLP":
+                template = "sleeping"
+            elif temperature > options.critical:
                 template = "critical"
             elif all([temperature > options.warning, temperature < options.critical, ]):
                 template = "warning"
