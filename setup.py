@@ -89,7 +89,7 @@ setup(
             "check-manifest==0.41",
             "coverage==5.0.4",
             "coveralls==1.11.1",
-            "pygments==2.6.1",
+            "pygments==2.5.2",
             "pytest-cov==2.8.1",
             "pytest-mock==3.0.0",
             "pytest-tldr==0.2.1",
