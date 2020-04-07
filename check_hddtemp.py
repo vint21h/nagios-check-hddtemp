@@ -52,7 +52,7 @@ OUTPUT_TEMPLATES = {
         "priority": 2,
     },
     "unknown": {
-        "text": "device {device} temperature info not found in server response",
+        "text": "device {device} temperature info not found in server response or can't be recognized by hddtemp",
         "priority": 3,
     },
     "ok": {
@@ -212,6 +212,8 @@ def check_hddtemp(data, options):
 
             if temperature == "SLP":
                 template = "sleeping"
+            elif temperature == "UNK":
+                template = "unknown"
             elif temperature > options.critical:
                 template = "critical"
             elif all([temperature > options.warning, temperature < options.critical, ]):
