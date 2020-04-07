@@ -9,9 +9,7 @@ python:
   - "3.7"
   - "3.8"
 before_install:
-  - |
-      pip install pipenv
-      pip install .[test]
+  - pip install pipenv
 script:
   - make tox
 after_success:
