@@ -38,7 +38,7 @@ except ImportError, error:
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 9, 0)
+VERSION = (0, 8, 2)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
