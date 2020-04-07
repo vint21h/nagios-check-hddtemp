@@ -7,3 +7,4 @@ include README.rst
 include COPYING
 include AUTHORS
 recursive-exclude tests *.py
+recursive-exclude *.pyi
