@@ -8,8 +8,13 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+env:
+  - test=".[test]"
+  - test-old-python=".[test-old-python]"
 before_install:
-  - pip install pipenv
+  - |
+      pip install pipenv
+      pip install .[test-old-python]
 script:
   - make tox
 after_success:
