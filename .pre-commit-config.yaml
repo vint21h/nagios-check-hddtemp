@@ -43,12 +43,6 @@ repos:
       language: system
       entry: pipenv run pylint .
       types: [python]
-    - id: darglint
-      name: darglint
-      stages: [commit]
-      language: system
-      entry: pipenv run darglint count4me
-      types: [python]
     - id: bandit
       name: bandit
       stages: [commit]
