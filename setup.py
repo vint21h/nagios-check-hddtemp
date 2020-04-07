@@ -6,7 +6,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = (0, 8, 2)
+VERSION = (0, 9, 0)
 __version__ = ".".join(map(str, VERSION))
 
 DATA = ["README.rst", "COPYING", "AUTHORS", ]

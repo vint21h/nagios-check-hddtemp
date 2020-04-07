@@ -5,8 +5,8 @@
 # nagios-check-hddtemp
 # check_hddtemp.py
 
-# Copyright (c) 2011-2016 Alexei Andrushievich <vint21h@vint21h.pp.ua>
-# Check HDD temperature Nagios plugin [https://github.com/vint21h/nagios-check-hddtemp]
+# Copyright (c) 2011-2020 Alexei Andrushievich <vint21h@vint21h.pp.ua>
+# Check HDD temperature Nagios plugin [https://github.com/vint21h/nagios-check-hddtemp/]
 #
 # This file is part of nagios-check-hddtemp.
 #
@@ -38,7 +38,7 @@ except ImportError, error:
 __all__ = ["main", ]
 
 # metadata
-VERSION = (0, 8, 2)
+VERSION = (0, 9, 0)
 __version__ = ".".join(map(str, VERSION))
 
 # global variables
@@ -124,7 +124,7 @@ def parse_options():
 
     # check if waning temperature in args less than critical
     if options.warning >= options.critical:
-        parser.error("Warning temperature option value must be less then critical option value")
+        parser.error("Warning temperature option value must be less than critical option value")
 
     return options
 

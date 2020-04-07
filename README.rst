@@ -18,7 +18,7 @@ Configuration
 * Read and understand Nagios documentation.
 * Create Nagios command and service definitions like this:
 
-::
+.. code-block::
 
     # "check_hddtemp" command
         define command
@@ -42,10 +42,11 @@ Without ``--devices`` option script check all devices from hddtemp response and 
 * warning
 * unknown
 * ok
+* sleeping
 
 Also, ``--devices`` option can take comma separated list of devices to check.
 
-If you want receive devices performance data, add ``-P`` argument to ``command_line``.
+If you want receive devices performance data, add ``-P`` argument to command line.
 
 Licensing
 ---------
