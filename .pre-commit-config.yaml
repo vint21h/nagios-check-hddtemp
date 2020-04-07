@@ -53,9 +53,9 @@ repos:
       name: bandit
       stages: [commit]
       language: system
-      entry: pipenv run bandit -r . --ini=.bandit
+      entry: pipenv run bandit --ini=.bandit
       types: [python]
-      pass_filenames: false
+      pass_filenames: true
     - id: dodgy
       name: dodgy
       stages: [commit]
