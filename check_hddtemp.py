@@ -405,6 +405,9 @@ class CheckHDDTemp(object):
     def check(self):
         """
         Get data from server, parse server response, check and create plugin output.
+
+        :return: nothing
+        :rtype: None
         """
 
         return self.output(
