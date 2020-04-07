@@ -93,7 +93,7 @@ setup(
             "pytest-cov==2.8.1",
             "pytest-mock==2.0.0",
             "pytest-tldr==0.2.1",
-            "pytest==5.4.1",
+            "pytest==4.6.9",
             "readme_renderer==25.0",
             "tox-pyenv==1.1.0",
             "tox-travis==0.12",
