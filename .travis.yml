@@ -1,0 +1,18 @@
+# nagios-check-hddtemp
+# .travis.yml
+
+
+language: python
+python:
+  - "2.7"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+before_install:
+  - |
+      pip install pipenv
+      pip install .[test]
+script:
+  - make tox
+after_success:
+  - make coveralls

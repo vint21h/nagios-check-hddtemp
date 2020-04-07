@@ -13,7 +13,7 @@ Source0: %{original_name}-%{version}.tar.gz
 License: GPLv3 or later
 Group: Applications/System
 BuildRequires: python-setuptools
-Requires: python >= 2.6
+Requires: python >= 2.7
 Requires: nagios-plugins
 Packager: Alexei Andrushievich <vint21h@vint21h.pp.ua>
 Url: https://github.com/vint21h/nagios-check-hddtemp
