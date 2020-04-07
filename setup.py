@@ -98,7 +98,7 @@ setup(
             "tox-pyenv==1.1.0",
             "tox-travis==0.12",
             "tox==3.14.6",
-            "twine==3.1.1",
+            "twine==1.15.0",
         ],
     },
 )
