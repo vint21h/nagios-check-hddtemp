@@ -38,7 +38,7 @@ Configuration
         check_command       check_hddtemp!127.0.0.1!7634!/dev/sda!40!50
     }
 
-Without ``--devices`` option plugin checks all devices from hddtemp response and return priority based global status:
+Without ``--devices`` option plugin checks all devices from hddtemp response and returns priority-based global status:
 
 * critical
 * warning
@@ -46,9 +46,9 @@ Without ``--devices`` option plugin checks all devices from hddtemp response and
 * ok
 * sleeping
 
-Also, ``--devices`` option can take comma separated list of devices to check.
+Also, ``--devices`` option can take comma-separated list of devices to check.
 
-If you want receive devices performance data, add ``-P`` argument to command line.
+If you want to receive devices performance data, add ``-P`` argument to the command line.
 
 Licensing
 ---------
