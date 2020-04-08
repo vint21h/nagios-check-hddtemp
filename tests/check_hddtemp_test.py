@@ -7,6 +7,7 @@
 from __future__ import unicode_literals
 
 from argparse import Namespace
+import socket
 
 import pytest
 
@@ -81,6 +82,7 @@ def test_get_data__network_error(mocker):
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    mocker.patch("telnetlib.Telnet.read_all", side_effect=socket.error)
     with pytest.raises(SystemExit):
         checker = CheckHDDTemp()
         checker.get_data()
