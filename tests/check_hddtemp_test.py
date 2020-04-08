@@ -52,7 +52,7 @@ def test_get_options__warning_gte_critical(mocker):
     greater or equal than critical error.
     """
 
-    mocker.patch("sys.argv", ["check_hddtemp.py", "-w", "10", "-c", "5"])
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-w", "65", "-c", "40"])
     with pytest.raises(SystemExit):
         CheckHDDTemp()
 
@@ -62,14 +62,12 @@ def test_get_data(mocker):
     Test "get_options" method must return data from server.
     """
 
-    expected = (
-        "|/dev/sda|WDC WD10SPCX-24HWST1|SLP|*||/dev/sdb|KINGSTON SH103S3120G|28|C|"
-    )
+    expected = "|/dev/sda|HARD DRIVE|28|C|"
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
         "telnetlib.Telnet.read_all",
-        lambda data: b"|/dev/sda|WDC WD10SPCX-24HWST1|SLP|*||/dev/sdb|KINGSTON SH103S3120G|28|C|",  # noqa: E501
+        lambda data: b"|/dev/sda|HARD DRIVE|28|C|",  # noqa: E501
     )
     checker = CheckHDDTemp()
     result = checker.get_data()
@@ -94,22 +92,11 @@ def test_parse_response(mocker):
     """
 
     expected = {
-        "/dev/sda": {
-            "model": "WDC WD10SPCX-24HWST1",
-            "temperature": "SLP",
-            "scale": "*",
-        },
-        "/dev/sdb": {
-            "model": "KINGSTON SH103S3120G",
-            "temperature": "28",
-            "scale": "C",
-        },
+        "/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"},
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.parse_response(
-        response="|/dev/sda|WDC WD10SPCX-24HWST1|SLP|*||/dev/sdb|KINGSTON SH103S3120G|28|C|"  # noqa: E501
-    )
+    result = checker.parse_response(response="|/dev/sda|HARD DRIVE|28|C|")  # noqa: E501
 
     assert result == expected  # nosec: B101
 
@@ -133,6 +120,182 @@ def test_parse_response__parsing_error(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     with pytest.raises(SystemExit):
         checker = CheckHDDTemp()
-        checker.parse_response(
-            response="|/dev/sda|WDC WD10SPCX-24HWST1|*||/dev/sdb|KINGSTON SH103S3120G|28|C|"  # noqa: E501
-        )
+        checker.parse_response(response="|/dev/sdq|HARD DRIVE|C|")  # noqa: E501
+
+
+def test_check_hddtemp(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info.
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "ok",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": 28,
+                "scale": "C",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_check_hddtemp__warning(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info (warning case).
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "warning",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": 42,
+                "scale": "C",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "42", "scale": "C"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_check_hddtemp__critical(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info (critical case).
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "critical",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": 69,
+                "scale": "C",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "69", "scale": "C"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_check_hddtemp__sleeping_device(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info (sleeping device case).
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "sleeping",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": "SLP",
+                "scale": "*",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "SLP", "scale": "*"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_check_hddtemp__unknown_device_temperature(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info
+    (unknown device temperature case).
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "unknown",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": "UNK",
+                "scale": "*",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "UNK", "scale": "*"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_check_hddtemp__unknown_device(mocker):
+    """
+    Test "check_hddtemp" method must return devices states info (unknown device case).
+    """
+
+    expected = {
+        "/dev/sda": {
+            "template": "ok",
+            "data": {
+                "device": "/dev/sda",
+                "temperature": 28,
+                "scale": "C",
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+        "/dev/sdb": {
+            "template": "unknown",
+            "data": {
+                "device": "/dev/sdb",
+                "temperature": None,
+                "scale": None,
+                "warning": 40,
+                "critical": 65,
+            },
+        },
+    }
+    mocker.patch(
+        "sys.argv",
+        [
+            "check_hddtemp.py",
+            "-s",
+            "127.0.0.1",
+            "-p",
+            "7634",
+            "-d",
+            "/dev/sda, /dev/sdb",
+        ],
+    )
+    checker = CheckHDDTemp()
+    result = checker.check_hddtemp(
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"}}
+    )
+
+    assert result == expected  # nosec: B101
