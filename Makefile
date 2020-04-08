@@ -6,7 +6,7 @@
 PHONY: pipenv-install tox test bumpversion build sign check check-build check-upload upload clean coveralls release help
 TEST_PYPI_URL=https://test.pypi.org/legacy/
 EXTENSIONS=py,html,txt,xml
-TRASH_DIRS=build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov
+TRASH_DIRS=build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov .pytest_cache
 TRASH_FILES=.coverage Pipfile.lock
 BUILD_TYPES=bdist_wheel sdist
 VERSION=`python -c "import check_hddtemp; print(check_hddtemp.__version__);"`
