@@ -187,6 +187,7 @@ class CheckHDDTemp(object):
             help="be quiet",
         )
         parser.add_argument(
+            "-v",
             "--version",
             action="version",
             version="{version}".format(**{"version": __version__}),
@@ -215,11 +216,11 @@ class CheckHDDTemp(object):
         """
 
         try:
-            tn = telnetlib.Telnet(
+            connection = telnetlib.Telnet(
                 self.options.server, self.options.port, self.options.timeout
             )
-            response = tn.read_all()
-            tn.close()
+            response = connection.read_all()
+            connection.close()
 
             return response.decode("utf8")
 
