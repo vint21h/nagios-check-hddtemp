@@ -7,6 +7,8 @@
 from __future__ import unicode_literals
 
 from argparse import Namespace
+import contextlib
+from io import StringIO
 import socket
 
 import pytest
@@ -60,9 +62,16 @@ def test_get_options__missing_server_option(mocker):
     Test "get_options" method must exit with server option missing error.
     """
 
+    out = StringIO()
     mocker.patch("sys.argv", ["check_hddtemp.py"])
+
     with pytest.raises(SystemExit):
-        CheckHDDTemp()
+        with contextlib.redirect_stderr(out):
+            CheckHDDTemp()
+
+    assert (  # nosec: B101
+        "Required server address option missing" in out.getvalue().strip()
+    )
 
 
 def test_get_options__warning_gte_critical(mocker):
@@ -71,9 +80,19 @@ def test_get_options__warning_gte_critical(mocker):
     greater or equal than critical error.
     """
 
-    mocker.patch("sys.argv", ["check_hddtemp.py", "-w", "65", "-c", "40"])
+    out = StringIO()
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s" "127.0.0.1", "-w", "65", "-c", "40"]
+    )
+
     with pytest.raises(SystemExit):
-        CheckHDDTemp()
+        with contextlib.redirect_stderr(out):
+            CheckHDDTemp()
+
+    assert (  # nosec: B101
+        "Warning temperature option value must be less than critical option value"
+        in out.getvalue().strip()
+    )
 
 
 def test_get_data(mocker):
@@ -88,6 +107,7 @@ def test_get_data(mocker):
         "telnetlib.Telnet.read_all",
         lambda data: b"|/dev/sda|HARD DRIVE|27|C|",  # noqa: E501
     )
+
     checker = CheckHDDTemp()
     result = checker.get_data()
 
@@ -99,11 +119,19 @@ def test_get_data__network_error(mocker):
     Test "get_options" method must exit with network error.
     """
 
+    out = StringIO()
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.read_all", side_effect=socket.error)
+    mocker.patch("telnetlib.Telnet.read_all", side_effect=EOFError)
+    checker = CheckHDDTemp()
+
     with pytest.raises(SystemExit):
-        checker = CheckHDDTemp()
-        checker.get_data()
+        with contextlib.redirect_stdout(out):
+            checker.get_data()
+
+    assert (  # nosec: B101
+        "ERROR: Server communication problem" in out.getvalue().strip()
+    )
 
 
 def test_parse_response(mocker):
@@ -126,10 +154,15 @@ def test_parse_response__too_short_error(mocker):
     Test "parse_response" method must exit with too short response error.
     """
 
+    out = StringIO()
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+
     with pytest.raises(SystemExit):
-        checker = CheckHDDTemp()
-        checker.parse_response(response="")
+        with contextlib.redirect_stdout(out):
+            checker.parse_response(response="")
+
+    assert "ERROR: Server response too short" in out.getvalue().strip()  # nosec: B101
 
 
 def test_parse_response__parsing_error(mocker):
@@ -137,10 +170,15 @@ def test_parse_response__parsing_error(mocker):
     Test "parse_response" method must exit with parsing error.
     """
 
+    out = StringIO()
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+
     with pytest.raises(SystemExit):
-        checker = CheckHDDTemp()
-        checker.parse_response(response="|/dev/sdq|HARD DRIVE|C|")  # noqa: E501
+        with contextlib.redirect_stdout(out):
+            checker.parse_response(response="|/dev/sda|HARD DRIVE|C|")  # noqa: E501
+
+    assert "ERROR: Server response for device" in out.getvalue().strip()  # nosec: B101
 
 
 def test_check_hddtemp(mocker):

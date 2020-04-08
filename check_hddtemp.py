@@ -26,16 +26,10 @@
 
 from __future__ import unicode_literals
 
+from argparse import ArgumentParser
+import socket
 import sys
-
-
-try:
-    from argparse import ArgumentParser
-    import socket
-    import telnetlib
-except ImportError as error:
-    sys.stderr.write("ERROR: Couldn't load module. {error}\n".format(error=error))
-    sys.exit(-1)
+import telnetlib
 
 
 __all__ = [
@@ -273,7 +267,7 @@ class CheckHDDTemp(object):
         data = {}
         response = response.split(self.options.separator * 2)
 
-        if response:
+        if response != [""]:
             for info in response:
                 info = info.strip(self.options.separator).split(self.options.separator)
                 if len(info) != 4:  # 4 data items in server response for device
