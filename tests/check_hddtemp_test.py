@@ -104,8 +104,7 @@ def test_get_data(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all",
-        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",  # noqa: E501
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
 
     checker = CheckHDDTemp()
@@ -477,7 +476,7 @@ def test_output__warning(mocker):
 def test_output__unknown_device(mocker):
     """
     Test "output" method must return Nagios and human readable HDD's statuses
-    (unknown device temperature case).
+    (unknown device case).
     """
 
     expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
@@ -517,7 +516,7 @@ def test_output__unknown_device(mocker):
 def test_output__unknown_device_temperature(mocker):
     """
     Test "output" method must return Nagios and human readable HDD's statuses
-    (unknown device case).
+    (unknown device temperature case).
     """
 
     expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
@@ -827,3 +826,272 @@ def test_output__sleeping__performance_data(mocker):
     )
 
     assert result == expected  # nosec: B101
+
+
+def test_check(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses.
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C\n"
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
+
+
+def test_check__critical(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (critical case).
+    """
+
+    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|69|C|",
+    )
+    checker = CheckHDDTemp()
+
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 2  # nosec: B101
+
+
+def test_check__warning(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    (warning case).
+    """
+
+    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|42|C|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 1  # nosec: B101
+
+
+def test_check__unknown_device(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    (unknown device case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv",
+        [
+            "check_hddtemp.py",
+            "-s",
+            "127.0.0.1",
+            "-p",
+            "7634",
+            "-d",
+            "/dev/sda, /dev/sdb",
+        ],
+    )
+    checker = CheckHDDTemp()
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+    )
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_check__unknown_device_temperature(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (unknown device temperature case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|UNK|*|",
+    )
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_check__sleeping(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    (sleeping case).
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|SLP|*|",
+    )
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
+
+
+def test_check__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data.
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C | /dev/sda=27\n"
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+    )
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
+
+
+def test_check__critical__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data (critical case).
+    """
+
+    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C | /dev/sda=27; /dev/sdb=69\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|69|C|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 2  # nosec: B101
+
+
+def test_check__warning__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data (warning case).
+    """
+
+    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C | /dev/sda=27; /dev/sdb=42\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|42|C|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 1  # nosec: B101
+
+
+def test_check__unknown_device__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data (unknown device case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=None\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv",
+        [
+            "check_hddtemp.py",
+            "-s",
+            "127.0.0.1",
+            "-p",
+            "7634",
+            "-P",
+            "-d",
+            "/dev/sda, /dev/sdb",
+        ],
+    )
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_check__unknown_device_temperature__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data (unknown device temperature case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=UNK\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|UNK|*|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_check__sleeping__performance_data(mocker):
+    """
+    Test "check" method must return Nagios and human readable HDD's statuses
+    with performance data (sleeping case).
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping | /dev/sda=27; /dev/sdb=SLP\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C||/dev/sdb|HARD DRIVE|SLP|*|",
+    )
+    checker = CheckHDDTemp()
+    result, code = checker.check()
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
