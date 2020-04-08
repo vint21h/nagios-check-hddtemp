@@ -299,8 +299,8 @@ class CheckHDDTemp(object):
                                     "device": device,
                                     "temperature": None,
                                     "scale": None,
-                                    "warning": None,
-                                    "critical": None,
+                                    "warning": self.options.warning,
+                                    "critical": self.options.critical,
                                 },
                             }
                         }
