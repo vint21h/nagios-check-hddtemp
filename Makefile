@@ -22,7 +22,7 @@ tox:
 
 
 test:
-	py.test -p no:cacheprovider -v tests --cov=. --verbose --color=yes;\
+	py.test -p no:cacheprovider -v tests --cov=check_hddtemp --verbose --color=yes;\
 
 
 bumpversion:
