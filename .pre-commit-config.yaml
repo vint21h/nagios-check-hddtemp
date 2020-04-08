@@ -16,7 +16,7 @@ repos:
       name: removestar
       stages: [commit]
       language: system
-      entry: pipenv run removestar -i .
+      entry: pipenv run removestar -i check_hddtemp
       types: [python]
     - id: isort
       name: isort
@@ -28,7 +28,7 @@ repos:
       name: black
       stages: [commit]
       language: system
-      entry: pipenv run black .
+      entry: pipenv run black check_hddtemp.py tests
       types: [python]
       language_version: python3.8
     - id: flake8
@@ -41,7 +41,7 @@ repos:
       name: pylint
       stages: [commit]
       language: system
-      entry: pipenv run pylint .
+      entry: pipenv run pylint check_hddtemp tests
       types: [python]
     - id: bandit
       name: bandit
@@ -91,3 +91,8 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: detect-private-key
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-symlinks
+      - id: forbid-new-submodules
+      - id: name-tests-test

@@ -81,6 +81,8 @@ class CheckHDDTemp(object):
     }
     PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 
+    options = None
+
     def __init__(self):
         """
         Get command line args.
