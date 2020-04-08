@@ -5,10 +5,11 @@
 # nagios-check-hddtemp
 # setup.py
 
+
 from setuptools import setup, find_packages
 
 
-VERSION = (0, 9, 0)
+VERSION = (1, 0, 0)
 __version__ = ".".join(map(str, VERSION))
 
 DATA = [
