@@ -87,7 +87,7 @@ setup(
         ],
         "test-old-python": [
             "check-manifest==0.41",
-            "coverage==5.0.4",
+            "contextlib2==0.6.0.post1" "coverage==5.0.4",
             "coveralls==1.11.1",
             "pygments==2.5.2",
             "pytest-cov==2.8.1",
