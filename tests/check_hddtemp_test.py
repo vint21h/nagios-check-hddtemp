@@ -10,15 +10,10 @@ from argparse import Namespace
 from io import StringIO
 import socket
 
+import contextlib2
 import pytest
 
 from check_hddtemp import CheckHDDTemp
-
-
-try:
-    import contextlib
-except ImportError:
-    import contextlib2 as contextlib
 
 
 __all__ = [
@@ -71,7 +66,7 @@ def test_get_options__missing_server_option(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py"])
 
     with pytest.raises(SystemExit):
-        with contextlib.redirect_stderr(out):
+        with contextlib2.redirect_stderr(out):
             CheckHDDTemp()
 
     assert (  # nosec: B101
@@ -91,7 +86,7 @@ def test_get_options__warning_gte_critical(mocker):
     )
 
     with pytest.raises(SystemExit):
-        with contextlib.redirect_stderr(out):
+        with contextlib2.redirect_stderr(out):
             CheckHDDTemp()
 
     assert (  # nosec: B101
@@ -130,7 +125,7 @@ def test_get_data__network_error(mocker):
     checker = CheckHDDTemp()
 
     with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(out):
+        with contextlib2.redirect_stdout(out):
             checker.get_data()
 
     assert (  # nosec: B101
@@ -163,7 +158,7 @@ def test_parse_response__too_short_error(mocker):
     checker = CheckHDDTemp()
 
     with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(out):
+        with contextlib2.redirect_stdout(out):
             checker.parse_response(response="")
 
     assert "ERROR: Server response too short" in out.getvalue().strip()  # nosec: B101
@@ -179,7 +174,7 @@ def test_parse_response__parsing_error(mocker):
     checker = CheckHDDTemp()
 
     with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(out):
+        with contextlib2.redirect_stdout(out):
             checker.parse_response(response="|/dev/sda|HARD DRIVE|C|")  # noqa: E501
 
     assert "ERROR: Server response for device" in out.getvalue().strip()  # nosec: B101

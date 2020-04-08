@@ -57,6 +57,7 @@ setup(
             "bandit==1.6.2",
             "black==19.10b0",
             "check-manifest==0.41",
+            "contextlib2==0.6.0.post1",
             "coverage==5.0.4",
             "coveralls==2.0.0",
             "dodgy==0.2.1",
