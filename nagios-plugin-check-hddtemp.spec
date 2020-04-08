@@ -34,6 +34,9 @@ install -p -m 755 check_hddtemp.py %{buildroot}%{_libdir}/nagios/plugins/check_h
 %{_libdir}/nagios/plugins/check_hddtemp
 
 %changelog
+* Thu Apr 9 2020 Alexei Andrushievich <vint21h@vint21h.pp.ua> - 1.0.1-1
+- Updated to new version
+
 * Thu Apr 9 2020 Alexei Andrushievich <vint21h@vint21h.pp.ua> - 1.0.0-1
 - Updated to new version
 
