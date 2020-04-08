@@ -9,7 +9,7 @@ EXTENSIONS=py,html,txt,xml
 TRASH_DIRS=build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov
 TRASH_FILES=.coverage Pipfile.lock
 BUILD_TYPES=bdist_wheel sdist
-VERSION=`python -c "import configparser; config = configparser.ConfigParser(); config.read('setup.cfg'); print(config['metadata']['version']);"`
+VERSION=`python -c "import check_hddtemp; print(check_hddtemp.__version__);"`
 
 
 pipenv-install:
