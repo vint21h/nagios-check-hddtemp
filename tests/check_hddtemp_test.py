@@ -7,13 +7,18 @@
 from __future__ import unicode_literals
 
 from argparse import Namespace
-import contextlib
 from io import StringIO
 import socket
 
 import pytest
 
 from check_hddtemp import CheckHDDTemp
+
+
+try:
+    import contextlib
+except ImportError:
+    import contextlib2 as contextlib
 
 
 __all__ = [
