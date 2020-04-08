@@ -54,7 +54,6 @@ class CheckHDDTemp(object):
     Check HDD temperature Nagios plugin.
     """
 
-    DEFAULT_EXIT_CODE = 3
     HDDTEMP_SLEEPING = "SLP"
     HDDTEMP_UNKNOWN = "UNK"
     STATUS_CRITICAL, STATUS_WARNING, STATUS_UNKNOWN, STATUS_OK, STATUS_SLEEPING = [
@@ -100,12 +99,13 @@ class CheckHDDTemp(object):
             "priority": PRIORITY_SLEEPING,
         },
     }
+    DEFAULT_EXIT_CODE = 3
     EXIT_CODES = {
-        "ok": 0,
-        "sleeping": 0,
-        "warning": 1,
-        "critical": 2,
-        "unknown": 3,
+        STATUS_OK: 0,
+        STATUS_SLEEPING: 0,
+        STATUS_WARNING: 1,
+        STATUS_CRITICAL: 2,
+        STATUS_UNKNOWN: 3,
     }
     PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 

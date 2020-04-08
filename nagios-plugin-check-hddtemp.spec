@@ -16,7 +16,7 @@ BuildRequires: python-setuptools
 Requires: python >= 2.7
 Requires: nagios-plugins
 Packager: Alexei Andrushievich <vint21h@vint21h.pp.ua>
-Url: https://github.com/vint21h/nagios-check-hddtemp
+Url: https://github.com/vint21h/nagios-check-hddtemp/
 
 %description
 Check HDD temperature Nagios plugin.
