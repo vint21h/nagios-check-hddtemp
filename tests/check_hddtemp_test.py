@@ -13,7 +13,7 @@ import socket
 import contextlib2
 import pytest
 
-from check_hddtemp import CheckHDDTemp
+from check_hddtemp import CheckHDDTemp, main
 
 
 __all__ = [
@@ -1095,3 +1095,24 @@ def test_check__sleeping__performance_data(mocker):
 
     assert result == expected  # nosec: B101
     assert code == 0  # nosec: B101
+
+
+def test_main(mocker):
+    """
+    Test "main" function must print Nagios and human readable HDD's statuses.
+    """
+
+    out = StringIO()
+    expected = "OK: device /dev/sda is functional and stable 27C\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    mocker.patch("telnetlib.Telnet.open")
+    mocker.patch(
+        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+    )
+
+    with pytest.raises(SystemExit) as excinfo:
+        with contextlib2.redirect_stdout(out):
+            main()
+
+    assert out.getvalue() == expected  # nosec: B101
+    assert excinfo.value.args == (0,)  # nosec: B101
