@@ -23,6 +23,12 @@ __all__ = [
     "test_parse_response",
     "test_parse_response__parsing_error",
     "test_parse_response__too_short_error",
+    "test_check_hddtemp",
+    "test_check_hddtemp__critical",
+    "test_check_hddtemp__sleeping_device",
+    "test_check_hddtemp__unknown_device",
+    "test_check_hddtemp__unknown_device_temperature",
+    "test_check_hddtemp__warning",
 ]
 
 
