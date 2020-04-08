@@ -29,6 +29,18 @@ __all__ = [
     "test_check_hddtemp__unknown_device",
     "test_check_hddtemp__unknown_device_temperature",
     "test_check_hddtemp__warning",
+    "test_output",
+    "test_output__critical",
+    "test_output__sleeping",
+    "test_output__unknown_device",
+    "test_output__unknown_device_temperature",
+    "test_output__warning",
+    "test_output__critical__performance_data",
+    "test_output__performance_data",
+    "test_output__sleeping__performance_data",
+    "test_output__unknown_device__performance_data",
+    "test_output__unknown_device_temperature__performance_data",
+    "test_output__warning__performance_data",
 ]
 
 
@@ -69,12 +81,12 @@ def test_get_data(mocker):
     Test "get_options" method must return data from server.
     """
 
-    expected = "|/dev/sda|HARD DRIVE|28|C|"
+    expected = "|/dev/sda|HARD DRIVE|27|C|"
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
         "telnetlib.Telnet.read_all",
-        lambda data: b"|/dev/sda|HARD DRIVE|28|C|",  # noqa: E501
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",  # noqa: E501
     )
     checker = CheckHDDTemp()
     result = checker.get_data()
@@ -100,11 +112,11 @@ def test_parse_response(mocker):
     """
 
     expected = {
-        "/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"},
+        "/dev/sda": {"model": "HARD DRIVE", "temperature": "27", "scale": "C"},
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.parse_response(response="|/dev/sda|HARD DRIVE|28|C|")  # noqa: E501
+    result = checker.parse_response(response="|/dev/sda|HARD DRIVE|27|C|")  # noqa: E501
 
     assert result == expected  # nosec: B101
 
@@ -142,7 +154,7 @@ def test_check_hddtemp(mocker):
             "priority": 4,
             "data": {
                 "device": "/dev/sda",
-                "temperature": 28,
+                "temperature": 27,
                 "scale": "C",
                 "warning": 40,
                 "critical": 65,
@@ -152,7 +164,7 @@ def test_check_hddtemp(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     result = checker.check_hddtemp(
-        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"}}
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "27", "scale": "C"}}
     )
 
     assert result == expected  # nosec: B101
@@ -278,7 +290,7 @@ def test_check_hddtemp__unknown_device(mocker):
             "priority": 4,
             "data": {
                 "device": "/dev/sda",
-                "temperature": 28,
+                "temperature": 27,
                 "scale": "C",
                 "warning": 40,
                 "critical": 65,
@@ -310,7 +322,470 @@ def test_check_hddtemp__unknown_device(mocker):
     )
     checker = CheckHDDTemp()
     result = checker.check_hddtemp(
-        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "28", "scale": "C"}}
+        data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "27", "scale": "C"}}
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses.
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C\n"
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
+
+
+def test_output__critical(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (critical case).
+    """
+
+    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "critical",
+                "priority": 1,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": 69,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 2  # nosec: B101
+
+
+def test_output__warning(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (warning case).
+    """
+
+    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "warning",
+                "priority": 2,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": 42,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 1  # nosec: B101
+
+
+def test_output__unknown_device(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (unknown device temperature case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "unknown",
+                "priority": 3,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": None,
+                    "scale": None,
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_output__unknown_device_temperature(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (unknown device case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "unknown",
+                "priority": 3,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": "UNK",
+                    "scale": "*",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 3  # nosec: B101
+
+
+def test_output__sleeping(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    (sleeping case).
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping\n"  # noqa: E501
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result, code = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "sleeping",
+                "priority": 5,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": "SLP",
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+    assert code == 0  # nosec: B101
+
+
+def test_output__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data.
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C | /dev/sda=27\n"
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output__critical__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data (critical case).
+    """
+
+    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C | /dev/sda=27; /dev/sdb=69\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "critical",
+                "priority": 1,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": 69,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output__warning__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data (warning case).
+    """
+
+    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C | /dev/sda=27; /dev/sdb=42\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "warning",
+                "priority": 2,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": 42,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output__unknown_device__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data (unknown device temperature case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=None\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "unknown",
+                "priority": 3,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": None,
+                    "scale": None,
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output__unknown_device_temperature__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data (unknown device case).
+    """
+
+    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=UNK\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "unknown",
+                "priority": 3,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": "UNK",
+                    "scale": "*",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
+    )
+
+    assert result == expected  # nosec: B101
+
+
+def test_output__sleeping__performance_data(mocker):
+    """
+    Test "output" method must return Nagios and human readable HDD's statuses
+    with performance data (sleeping case).
+    """
+
+    expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping | /dev/sda=27; /dev/sdb=SLP\n"  # noqa: E501
+    mocker.patch(
+        "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
+    )
+    checker = CheckHDDTemp()
+    result, _ = checker.output(
+        states={
+            "/dev/sda": {
+                "template": "ok",
+                "priority": 4,
+                "data": {
+                    "device": "/dev/sda",
+                    "temperature": 27,
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+            "/dev/sdb": {
+                "template": "sleeping",
+                "priority": 5,
+                "data": {
+                    "device": "/dev/sdb",
+                    "temperature": "SLP",
+                    "scale": "C",
+                    "warning": 40,
+                    "critical": 65,
+                },
+            },
+        }
     )
 
     assert result == expected  # nosec: B101
