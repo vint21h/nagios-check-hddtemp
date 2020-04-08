@@ -54,30 +54,58 @@ class CheckHDDTemp(object):
     Check HDD temperature Nagios plugin.
     """
 
+    DEFAULT_EXIT_CODE = 3
+    HDDTEMP_SLEEPING = "SLP"
+    HDDTEMP_UNKNOWN = "UNK"
+    STATUS_CRITICAL, STATUS_WARNING, STATUS_UNKNOWN, STATUS_OK, STATUS_SLEEPING = [
+        "critical",
+        "warning",
+        "unknown",
+        "ok",
+        "sleeping",
+    ]
+    (
+        PRIORITY_CRITICAL,
+        PRIORITY_WARNING,
+        PRIORITY_UNKNOWN,
+        PRIORITY_OK,
+        PRIORITY_SLEEPING,
+    ) = range(1, 6)
+    PRIORITY_TO_STATUS = {
+        PRIORITY_CRITICAL: STATUS_CRITICAL,
+        PRIORITY_WARNING: STATUS_WARNING,
+        PRIORITY_UNKNOWN: STATUS_UNKNOWN,
+        PRIORITY_OK: STATUS_OK,
+        PRIORITY_SLEEPING: STATUS_SLEEPING,
+    }
     OUTPUT_TEMPLATES = {
-        "critical": {
+        STATUS_CRITICAL: {
             "text": "device {device} temperature {temperature}{scale} exceeds critical temperature threshold {critical}{scale}",  # noqa: E501
-            "priority": 1,
+            "priority": PRIORITY_CRITICAL,
         },
-        "warning": {
+        STATUS_WARNING: {
             "text": "device {device} temperature {temperature}{scale} exceeds warning temperature threshold {warning}{scale}",  # noqa: E501
-            "priority": 2,
+            "priority": PRIORITY_WARNING,
         },
-        "unknown": {
+        STATUS_UNKNOWN: {
             "text": "device {device} temperature info not found in server response or can't be recognized by hddtemp",  # noqa: E501
-            "priority": 3,
+            "priority": PRIORITY_UNKNOWN,
         },
-        "ok": {
+        STATUS_OK: {
             "text": "device {device} is functional and stable {temperature}{scale}",
-            "priority": 4,
+            "priority": PRIORITY_OK,
         },
-        "sleeping": {"text": "device {device} is sleeping", "priority": 5},
+        STATUS_SLEEPING: {
+            "text": "device {device} is sleeping",
+            "priority": PRIORITY_SLEEPING,
+        },
     }
     EXIT_CODES = {
         "ok": 0,
         "sleeping": 0,
         "warning": 1,
         "critical": 2,
+        "unknown": 3,
     }
     PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 
@@ -230,7 +258,7 @@ class CheckHDDTemp(object):
                     "ERROR: Server communication problem. {error}\n".format(error=error)
                 )
 
-            sys.exit(3)
+            sys.exit(self.DEFAULT_EXIT_CODE)
 
     def parse_response(self, response):
         """
@@ -248,14 +276,14 @@ class CheckHDDTemp(object):
         if response:
             for info in response:
                 info = info.strip(self.options.separator).split(self.options.separator)
-                if len(info) != 4:
+                if len(info) != 4:  # 4 data items in server response for device
                     if not self.options.quiet:
                         sys.stdout.write(
                             "ERROR: Server response for device '{dev}' parsing error\n".format(  # noqa: E501
                                 dev=info
                             )
                         )
-                    sys.exit(3)
+                    sys.exit(self.DEFAULT_EXIT_CODE)
                 dev, model, temperature, scale = info
                 data.update(
                     {dev: {"model": model, "temperature": temperature, "scale": scale}}
@@ -263,7 +291,7 @@ class CheckHDDTemp(object):
         else:
             if not self.options.quiet:
                 sys.stdout.write("ERROR: Server response too short\n")
-            sys.exit(3)
+            sys.exit(self.DEFAULT_EXIT_CODE)
 
         return data
 
@@ -294,7 +322,10 @@ class CheckHDDTemp(object):
                     states.update(
                         {
                             device: {
-                                "template": "unknown",
+                                "template": self.STATUS_UNKNOWN,
+                                "priority": self.OUTPUT_TEMPLATES[self.STATUS_UNKNOWN][
+                                    "priority"
+                                ],
                                 "data": {
                                     "device": device,
                                     "temperature": None,
@@ -314,26 +345,27 @@ class CheckHDDTemp(object):
                 except ValueError:
                     temperature = info["temperature"]
 
-                if temperature == "SLP":
-                    template = "sleeping"
-                elif temperature == "UNK":
-                    template = "unknown"
+                if temperature == self.HDDTEMP_SLEEPING:
+                    template = self.STATUS_SLEEPING
+                elif temperature == self.HDDTEMP_UNKNOWN:
+                    template = self.STATUS_UNKNOWN
                 elif temperature > self.options.critical:
-                    template = "critical"
+                    template = self.STATUS_CRITICAL
                 elif all(
                     [
                         temperature > self.options.warning,
                         temperature < self.options.critical,
                     ]
                 ):
-                    template = "warning"
+                    template = self.STATUS_WARNING
                 else:
-                    template = "ok"
+                    template = self.STATUS_OK
 
                 states.update(
                     {
                         device: {
                             "template": template,
+                            "priority": self.OUTPUT_TEMPLATES[template]["priority"],
                             "data": {
                                 "device": device,
                                 "temperature": temperature,
@@ -361,19 +393,10 @@ class CheckHDDTemp(object):
 
         # getting main status for check
         # (for multiple check need to get main status by priority)
-        status = [
-            status[0]
-            for status in sorted(
-                [
-                    (status, self.OUTPUT_TEMPLATES[status]["priority"])
-                    for status in list(
-                        set([states[data]["template"] for data in states.keys()])
-                    )
-                ],
-                key=lambda x: x[1],
-            )
-        ][0]
-        code = self.EXIT_CODES.get(status, 3)  # create exit code
+        priority = min([data["priority"] for device, data in states.items()])
+        status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
+
+        code = self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)  # create exit code
         devices = ", ".join(
             [
                 self.OUTPUT_TEMPLATES[states[data]["template"]]["text"].format(
@@ -392,8 +415,10 @@ class CheckHDDTemp(object):
                     "data": devices,
                     "performance-data": "; ".join(
                         [
-                            self.PERFORMANCE_DATA_TEMPLATE.format(**states[d]["data"])
-                            for d in states.keys()
+                            self.PERFORMANCE_DATA_TEMPLATE.format(
+                                **states[device]["data"]
+                            )
+                            for device in states.keys()
                         ]
                     ),
                 }

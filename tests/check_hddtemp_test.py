@@ -131,6 +131,7 @@ def test_check_hddtemp(mocker):
     expected = {
         "/dev/sda": {
             "template": "ok",
+            "priority": 4,
             "data": {
                 "device": "/dev/sda",
                 "temperature": 28,
@@ -157,6 +158,7 @@ def test_check_hddtemp__warning(mocker):
     expected = {
         "/dev/sda": {
             "template": "warning",
+            "priority": 2,
             "data": {
                 "device": "/dev/sda",
                 "temperature": 42,
@@ -183,6 +185,7 @@ def test_check_hddtemp__critical(mocker):
     expected = {
         "/dev/sda": {
             "template": "critical",
+            "priority": 1,
             "data": {
                 "device": "/dev/sda",
                 "temperature": 69,
@@ -209,6 +212,7 @@ def test_check_hddtemp__sleeping_device(mocker):
     expected = {
         "/dev/sda": {
             "template": "sleeping",
+            "priority": 5,
             "data": {
                 "device": "/dev/sda",
                 "temperature": "SLP",
@@ -236,6 +240,7 @@ def test_check_hddtemp__unknown_device_temperature(mocker):
     expected = {
         "/dev/sda": {
             "template": "unknown",
+            "priority": 3,
             "data": {
                 "device": "/dev/sda",
                 "temperature": "UNK",
@@ -262,6 +267,7 @@ def test_check_hddtemp__unknown_device(mocker):
     expected = {
         "/dev/sda": {
             "template": "ok",
+            "priority": 4,
             "data": {
                 "device": "/dev/sda",
                 "temperature": 28,
@@ -272,6 +278,7 @@ def test_check_hddtemp__unknown_device(mocker):
         },
         "/dev/sdb": {
             "template": "unknown",
+            "priority": 3,
             "data": {
                 "device": "/dev/sdb",
                 "temperature": None,
