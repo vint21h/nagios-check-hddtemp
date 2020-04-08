@@ -384,7 +384,7 @@ class CheckHDDTemp(object):
         Create Nagios and human readable HDD's statuses.
 
         :param states: devices states info
-        :type states: Dict[str, Dict[str, Union[str, Dict[str, Union[None, int, str]]]]]
+        :type states: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
         :return: Nagios and human readable HDD's statuses
         :rtype: Tuple[str, int]
         """
