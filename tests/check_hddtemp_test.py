@@ -399,7 +399,7 @@ def test__get_output__critical(mocker):
     (critical case).
     """
 
-    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C\n"  # noqa: E501
+    expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     result, code = checker._get_output(
@@ -439,7 +439,7 @@ def test__get_output__warning(mocker):
     (warning case).
     """
 
-    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C\n"  # noqa: E501
+    expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     result, code = checker._get_output(
@@ -479,7 +479,7 @@ def test__get_output__unknown_device(mocker):
     (unknown device case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     result, code = checker._get_output(
@@ -519,7 +519,7 @@ def test__get_output__unknown_device_temperature(mocker):
     (unknown device temperature case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     result, code = checker._get_output(
@@ -629,7 +629,7 @@ def test__get_output__critical__performance_data(mocker):
     with performance data (critical case).
     """
 
-    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C | /dev/sda=27; /dev/sdb=69\n"  # noqa: E501
+    expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C | /dev/sdb=69; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -670,7 +670,7 @@ def test__get_output__warning__performance_data(mocker):
     with performance data (warning case).
     """
 
-    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C | /dev/sda=27; /dev/sdb=42\n"  # noqa: E501
+    expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C | /dev/sdb=42; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -711,7 +711,7 @@ def test__get_output__unknown_device__performance_data(mocker):
     with performance data (unknown device temperature case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=None\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=None; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -752,7 +752,7 @@ def test__get_output__unknown_device_temperature__performance_data(mocker):
     with performance data (unknown device case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=UNK\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=UNK; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -852,7 +852,7 @@ def test_check__critical(mocker):
     (critical case).
     """
 
-    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C\n"  # noqa: E501
+    expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
@@ -873,7 +873,7 @@ def test_check__warning(mocker):
     (warning case).
     """
 
-    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C\n"  # noqa: E501
+    expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
@@ -893,7 +893,7 @@ def test_check__unknown_device(mocker):
     (unknown device case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch(
         "sys.argv",
         [
@@ -923,7 +923,7 @@ def test_check__unknown_device_temperature(mocker):
     (unknown device temperature case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     mocker.patch("telnetlib.Telnet.open")
@@ -984,7 +984,7 @@ def test_check__critical__performance_data(mocker):
     with performance data (critical case).
     """
 
-    expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C | /dev/sda=27; /dev/sdb=69\n"  # noqa: E501
+    expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C | /dev/sdb=69; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -1006,7 +1006,7 @@ def test_check__warning__performance_data(mocker):
     with performance data (warning case).
     """
 
-    expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C | /dev/sda=27; /dev/sdb=42\n"  # noqa: E501
+    expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C | /dev/sdb=42; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
@@ -1028,7 +1028,7 @@ def test_check__unknown_device__performance_data(mocker):
     with performance data (unknown device case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=None\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=None; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv",
         [
@@ -1059,7 +1059,7 @@ def test_check__unknown_device_temperature__performance_data(mocker):
     with performance data (unknown device temperature case).
     """
 
-    expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp | /dev/sda=27; /dev/sdb=UNK\n"  # noqa: E501
+    expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=UNK; /dev/sda=27\n"  # noqa: E501
     mocker.patch(
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
