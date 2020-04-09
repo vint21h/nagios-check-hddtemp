@@ -388,18 +388,11 @@ class CheckHDDTemp(object):
 
         output = ""
         # sort devices data by priority
-        data = OrderedDict(
-            {
-                device: data
-                for device, data in sorted(
-                    data.items(), key=lambda item: item[1]["priority"]
-                )
-            }
-        )
+        data = OrderedDict(sorted(data.items(), key=lambda item: item[1]["priority"]))
 
         # getting main status for check
         # (for multiple check need to get main status by priority)
-        priority = min([data["priority"] for device, data in data.items()])
+        priority = min([info["priority"] for device, info in data.items()])
         status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
         code = self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)  # create exit code
         devices = ", ".join(
