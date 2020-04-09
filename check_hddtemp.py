@@ -376,12 +376,30 @@ class CheckHDDTemp(object):
 
         return states
 
-    def _get_output(self, data):
+    def _get_status(self, data):
+        """
+        Create main status.
+
+        :param data: devices states info
+        :type data: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
+        :return: main check status
+        :rtype: str
+        """
+
+        # for multiple check need to get main status by priority
+        priority = min([info["priority"] for device, info in data.items()])
+        status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
+
+        return status
+
+    def _get_output(self, data, status):
         """
         Create Nagios and human readable HDD's statuses.
 
         :param data: devices states info
         :type data: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
+        :param status: main check status
+        :type status: str
         :return: Nagios and human readable HDD's statuses
         :rtype: Tuple[str, int]
         """
@@ -390,10 +408,6 @@ class CheckHDDTemp(object):
         # sort devices data by priority
         data = OrderedDict(sorted(data.items(), key=lambda item: item[1]["priority"]))
 
-        # getting main status for check
-        # (for multiple check need to get main status by priority)
-        priority = min([info["priority"] for device, info in data.items()])
-        status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
         code = self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)  # create exit code
         devices = ", ".join(
             [
@@ -436,9 +450,10 @@ class CheckHDDTemp(object):
         :rtype: None
         """
 
-        return self._get_output(
-            data=self._check_data(data=self._parse_data(data=self._get_data()))
-        )
+        data = self._check_data(data=self._parse_data(data=self._get_data()))
+        status = self._get_status(data=data)
+
+        return self._get_output(data=data, status=status)
 
 
 def main():
