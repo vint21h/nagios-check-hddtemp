@@ -17,38 +17,38 @@ from check_hddtemp import CheckHDDTemp, main
 
 
 __all__ = [
-    "test_get_options",
-    "test_get_options__missing_server_option",
-    "test_get_options__warning_gte_critical",
-    "test_get_data",
-    "test_get_data__network_error",
-    "test_parse_response",
-    "test_parse_response__parsing_error",
-    "test_parse_response__too_short_error",
-    "test_check_hddtemp",
-    "test_check_hddtemp__critical",
-    "test_check_hddtemp__sleeping_device",
-    "test_check_hddtemp__unknown_device",
-    "test_check_hddtemp__unknown_device_temperature",
-    "test_check_hddtemp__warning",
-    "test_output",
-    "test_output__critical",
-    "test_output__sleeping",
-    "test_output__unknown_device",
-    "test_output__unknown_device_temperature",
-    "test_output__warning",
-    "test_output__critical__performance_data",
-    "test_output__performance_data",
-    "test_output__sleeping__performance_data",
-    "test_output__unknown_device__performance_data",
-    "test_output__unknown_device_temperature__performance_data",
-    "test_output__warning__performance_data",
+    "test__get_options",
+    "test__get_options__missing_server_option",
+    "test__get_options__warning_gte_critical",
+    "test__get_data",
+    "test__get_data__network_error",
+    "test__parse_data",
+    "test__parse_data__parsing_error",
+    "test__parse_data__too_short_error",
+    "test__check_data",
+    "test__check_data__critical",
+    "test__check_data__sleeping_device",
+    "test__check_data__unknown_device",
+    "test__check_data__unknown_device_temperature",
+    "test__check_data__warning",
+    "test__get_output",
+    "test__get_output__critical",
+    "test__get_output__sleeping",
+    "test__get_output__unknown_device",
+    "test__get_output__unknown_device_temperature",
+    "test__get_output__warning",
+    "test__get_output__critical__performance_data",
+    "test__get_output__performance_data",
+    "test__get_output__sleeping__performance_data",
+    "test__get_output__unknown_device__performance_data",
+    "test__get_output__unknown_device_temperature__performance_data",
+    "test__get_output__warning__performance_data",
 ]
 
 
-def test_get_options(mocker):
+def test__get_options(mocker):
     """
-    Test "get_options" method must return argparse namespace.
+    Test "_get_options" method must return argparse namespace.
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -57,9 +57,9 @@ def test_get_options(mocker):
     assert isinstance(checker.options, Namespace)  # nosec: B101
 
 
-def test_get_options__missing_server_option(mocker):
+def test__get_options__missing_server_option(mocker):
     """
-    Test "get_options" method must exit with server option missing error.
+    Test "_get_options" method must exit with server option missing error.
     """
 
     out = StringIO()
@@ -74,9 +74,9 @@ def test_get_options__missing_server_option(mocker):
     )
 
 
-def test_get_options__warning_gte_critical(mocker):
+def test__get_options__warning_gte_critical(mocker):
     """
-    Test "get_options" method must exit with warning option
+    Test "_get_options" method must exit with warning option
     greater or equal than critical error.
     """
 
@@ -95,9 +95,9 @@ def test_get_options__warning_gte_critical(mocker):
     )
 
 
-def test_get_data(mocker):
+def test__get_data(mocker):
     """
-    Test "get_options" method must return data from server.
+    Test "_get_data" method must return data from server.
     """
 
     expected = "|/dev/sda|HARD DRIVE|27|C|"
@@ -108,14 +108,14 @@ def test_get_data(mocker):
     )
 
     checker = CheckHDDTemp()
-    result = checker.get_data()
+    result = checker._get_data()
 
     assert result == expected  # nosec: B101
 
 
-def test_get_data__network_error(mocker):
+def test__get_data__network_error(mocker):
     """
-    Test "get_options" method must exit with network error.
+    Test "_get_data" method must exit with network error.
     """
 
     out = StringIO()
@@ -126,16 +126,16 @@ def test_get_data__network_error(mocker):
 
     with pytest.raises(SystemExit):
         with contextlib2.redirect_stdout(out):
-            checker.get_data()
+            checker._get_data()
 
     assert (  # nosec: B101
         "ERROR: Server communication problem" in out.getvalue().strip()
     )
 
 
-def test_parse_response(mocker):
+def test__parse_data(mocker):
     """
-    Test "parse_response" method must return structured data.
+    Test "_parse_data" method must return structured data.
     """
 
     expected = {
@@ -143,14 +143,14 @@ def test_parse_response(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.parse_response(response="|/dev/sda|HARD DRIVE|27|C|")  # noqa: E501
+    result = checker._parse_data(data="|/dev/sda|HARD DRIVE|27|C|")  # noqa: E501
 
     assert result == expected  # nosec: B101
 
 
-def test_parse_response__too_short_error(mocker):
+def test__parse_data__too_short_error(mocker):
     """
-    Test "parse_response" method must exit with too short response error.
+    Test "_parse_data" method must exit with too short response error.
     """
 
     out = StringIO()
@@ -159,14 +159,14 @@ def test_parse_response__too_short_error(mocker):
 
     with pytest.raises(SystemExit):
         with contextlib2.redirect_stdout(out):
-            checker.parse_response(response="")
+            checker._parse_data(data="")
 
     assert "ERROR: Server response too short" in out.getvalue().strip()  # nosec: B101
 
 
-def test_parse_response__parsing_error(mocker):
+def test__parse_data__parsing_error(mocker):
     """
-    Test "parse_response" method must exit with parsing error.
+    Test "_parse_data" method must exit with parsing error.
     """
 
     out = StringIO()
@@ -175,14 +175,14 @@ def test_parse_response__parsing_error(mocker):
 
     with pytest.raises(SystemExit):
         with contextlib2.redirect_stdout(out):
-            checker.parse_response(response="|/dev/sda|HARD DRIVE|C|")  # noqa: E501
+            checker._parse_data(data="|/dev/sda|HARD DRIVE|C|")  # noqa: E501
 
     assert "ERROR: Server response for device" in out.getvalue().strip()  # nosec: B101
 
 
-def test_check_hddtemp(mocker):
+def test__check_data(mocker):
     """
-    Test "check_hddtemp" method must return devices states info.
+    Test "_check_data" method must return devices states info.
     """
 
     expected = {
@@ -200,16 +200,16 @@ def test_check_hddtemp(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "27", "scale": "C"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_check_hddtemp__warning(mocker):
+def test__check_data__warning(mocker):
     """
-    Test "check_hddtemp" method must return devices states info (warning case).
+    Test "_check_data" method must return devices states info (warning case).
     """
 
     expected = {
@@ -227,16 +227,16 @@ def test_check_hddtemp__warning(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "42", "scale": "C"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_check_hddtemp__critical(mocker):
+def test__check_data__critical(mocker):
     """
-    Test "check_hddtemp" method must return devices states info (critical case).
+    Test "_check_data" method must return devices states info (critical case).
     """
 
     expected = {
@@ -254,16 +254,16 @@ def test_check_hddtemp__critical(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "69", "scale": "C"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_check_hddtemp__sleeping_device(mocker):
+def test__check_data__sleeping_device(mocker):
     """
-    Test "check_hddtemp" method must return devices states info (sleeping device case).
+    Test "_check_data" method must return devices states info (sleeping device case).
     """
 
     expected = {
@@ -281,16 +281,16 @@ def test_check_hddtemp__sleeping_device(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "SLP", "scale": "*"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_check_hddtemp__unknown_device_temperature(mocker):
+def test__check_data__unknown_device_temperature(mocker):
     """
-    Test "check_hddtemp" method must return devices states info
+    Test "_check_data" method must return devices states info
     (unknown device temperature case).
     """
 
@@ -309,16 +309,16 @@ def test_check_hddtemp__unknown_device_temperature(mocker):
     }
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "UNK", "scale": "*"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_check_hddtemp__unknown_device(mocker):
+def test__check_data__unknown_device(mocker):
     """
-    Test "check_hddtemp" method must return devices states info (unknown device case).
+    Test "_check_data" method must return devices states info (unknown device case).
     """
 
     expected = {
@@ -358,23 +358,23 @@ def test_check_hddtemp__unknown_device(mocker):
         ],
     )
     checker = CheckHDDTemp()
-    result = checker.check_hddtemp(
+    result = checker._check_data(
         data={"/dev/sda": {"model": "HARD DRIVE", "temperature": "27", "scale": "C"}}
     )
 
     assert result == expected  # nosec: B101
 
 
-def test_output(mocker):
+def test__get_output(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses.
+    Test "_get_output" method must return Nagios and human readable HDD's statuses.
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C\n"
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -393,17 +393,17 @@ def test_output(mocker):
     assert code == 0  # nosec: B101
 
 
-def test_output__critical(mocker):
+def test__get_output__critical(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (critical case).
     """
 
     expected = "CRITICAL: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 69C exceeds critical temperature threshold 65C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -433,17 +433,17 @@ def test_output__critical(mocker):
     assert code == 2  # nosec: B101
 
 
-def test_output__warning(mocker):
+def test__get_output__warning(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (warning case).
     """
 
     expected = "WARNING: device /dev/sda is functional and stable 27C, device /dev/sdb temperature 42C exceeds warning temperature threshold 40C\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -473,17 +473,17 @@ def test_output__warning(mocker):
     assert code == 1  # nosec: B101
 
 
-def test_output__unknown_device(mocker):
+def test__get_output__unknown_device(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (unknown device case).
     """
 
     expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -513,17 +513,17 @@ def test_output__unknown_device(mocker):
     assert code == 3  # nosec: B101
 
 
-def test_output__unknown_device_temperature(mocker):
+def test__get_output__unknown_device_temperature(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (unknown device temperature case).
     """
 
     expected = "UNKNOWN: device /dev/sda is functional and stable 27C, device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -553,17 +553,17 @@ def test_output__unknown_device_temperature(mocker):
     assert code == 3  # nosec: B101
 
 
-def test_output__sleeping(mocker):
+def test__get_output__sleeping(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (sleeping case).
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping\n"  # noqa: E501
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
-    result, code = checker.output(
-        states={
+    result, code = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -593,9 +593,9 @@ def test_output__sleeping(mocker):
     assert code == 0  # nosec: B101
 
 
-def test_output__performance_data(mocker):
+def test__get_output__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data.
     """
 
@@ -604,8 +604,8 @@ def test_output__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -623,9 +623,9 @@ def test_output__performance_data(mocker):
     assert result == expected  # nosec: B101
 
 
-def test_output__critical__performance_data(mocker):
+def test__get_output__critical__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data (critical case).
     """
 
@@ -634,8 +634,8 @@ def test_output__critical__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -664,9 +664,9 @@ def test_output__critical__performance_data(mocker):
     assert result == expected  # nosec: B101
 
 
-def test_output__warning__performance_data(mocker):
+def test__get_output__warning__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data (warning case).
     """
 
@@ -675,8 +675,8 @@ def test_output__warning__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -705,9 +705,9 @@ def test_output__warning__performance_data(mocker):
     assert result == expected  # nosec: B101
 
 
-def test_output__unknown_device__performance_data(mocker):
+def test__get_output__unknown_device__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data (unknown device temperature case).
     """
 
@@ -716,8 +716,8 @@ def test_output__unknown_device__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -746,9 +746,9 @@ def test_output__unknown_device__performance_data(mocker):
     assert result == expected  # nosec: B101
 
 
-def test_output__unknown_device_temperature__performance_data(mocker):
+def test__get_output__unknown_device_temperature__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data (unknown device case).
     """
 
@@ -757,8 +757,8 @@ def test_output__unknown_device_temperature__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -787,9 +787,9 @@ def test_output__unknown_device_temperature__performance_data(mocker):
     assert result == expected  # nosec: B101
 
 
-def test_output__sleeping__performance_data(mocker):
+def test__get_output__sleeping__performance_data(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     with performance data (sleeping case).
     """
 
@@ -798,8 +798,8 @@ def test_output__sleeping__performance_data(mocker):
         "sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634", "-P"]
     )
     checker = CheckHDDTemp()
-    result, _ = checker.output(
-        states={
+    result, _ = checker._get_output(
+        data={
             "/dev/sda": {
                 "template": "ok",
                 "priority": 4,
@@ -848,7 +848,7 @@ def test_check(mocker):
 
 def test_check__critical(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (critical case).
     """
 
@@ -919,7 +919,7 @@ def test_check__unknown_device(mocker):
 
 def test_check__unknown_device_temperature(mocker):
     """
-    Test "output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return Nagios and human readable HDD's statuses
     (unknown device temperature case).
     """
 
