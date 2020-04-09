@@ -27,6 +27,7 @@
 from __future__ import unicode_literals
 
 from argparse import ArgumentParser
+from collections import OrderedDict
 import socket
 import sys
 import telnetlib
@@ -110,10 +111,10 @@ class CheckHDDTemp(object):
         Get command line args.
         """
 
-        self.options = self.get_options()
+        self.options = self._get_options()
 
     @staticmethod
-    def get_options():
+    def _get_options():
         """
         Parse commandline options arguments.
 
@@ -229,7 +230,7 @@ class CheckHDDTemp(object):
 
         return options
 
-    def get_data(self):
+    def _get_data(self):
         """
         Get and return data from hddtemp server.
 
@@ -254,32 +255,34 @@ class CheckHDDTemp(object):
 
             sys.exit(self.DEFAULT_EXIT_CODE)
 
-    def parse_response(self, response):
+    def _parse_data(self, data):
         """
         Search for device and get HDD info from server response.
 
-        :param response: hddtemp server response
-        :type response: str
+        :param data: hddtemp server response
+        :type data: str
         :return: structured data parsed from hddtemp server response
         :rtype: Dict[str, Dict[str, str]]
         """
 
-        data = {}
-        response = response.split(self.options.separator * 2)
+        info = OrderedDict()
+        data = data.split(self.options.separator * 2)
 
-        if response != [""]:
-            for info in response:
-                info = info.strip(self.options.separator).split(self.options.separator)
-                if len(info) != 4:  # 4 data items in server response for device
+        if data != [""]:
+            for device in data:
+                device = device.strip(self.options.separator).split(
+                    self.options.separator
+                )
+                if len(device) != 4:  # 4 data items in server response for device
                     if not self.options.quiet:
                         sys.stdout.write(
                             "ERROR: Server response for device '{dev}' parsing error\n".format(  # noqa: E501
-                                dev=info
+                                dev=device
                             )
                         )
                     sys.exit(self.DEFAULT_EXIT_CODE)
-                dev, model, temperature, scale = info
-                data.update(
+                dev, model, temperature, scale = device
+                info.update(
                     {dev: {"model": model, "temperature": temperature, "scale": scale}}
                 )
         else:
@@ -287,9 +290,9 @@ class CheckHDDTemp(object):
                 sys.stdout.write("ERROR: Server response too short\n")
             sys.exit(self.DEFAULT_EXIT_CODE)
 
-        return data
+        return info
 
-    def check_hddtemp(self, data):
+    def _check_data(self, data):
         """
         Create devices states info.
 
@@ -299,7 +302,7 @@ class CheckHDDTemp(object):
         :rtype: Dict[str, Dict[str, Union[str, Dict[str, Union[None, int, str]]]]]
         """
 
-        states = dict()
+        states = OrderedDict()
 
         if self.options.devices:
             devices = map(
@@ -373,12 +376,12 @@ class CheckHDDTemp(object):
 
         return states
 
-    def output(self, states):
+    def _get_output(self, data):
         """
         Create Nagios and human readable HDD's statuses.
 
-        :param states: devices states info
-        :type states: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
+        :param data: devices states info
+        :type data: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
         :return: Nagios and human readable HDD's statuses
         :rtype: Tuple[str, int]
         """
@@ -387,16 +390,16 @@ class CheckHDDTemp(object):
 
         # getting main status for check
         # (for multiple check need to get main status by priority)
-        priority = min([data["priority"] for device, data in states.items()])
+        priority = min([data["priority"] for device, data in data.items()])
         status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
 
         code = self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)  # create exit code
         devices = ", ".join(
             [
-                self.OUTPUT_TEMPLATES[states[data]["template"]]["text"].format(
-                    **states[data]["data"]
+                self.OUTPUT_TEMPLATES[data[device]["template"]]["text"].format(
+                    **data[device]["data"]
                 )
-                for data in states.keys()
+                for device in data.keys()
             ]
         )
 
@@ -410,9 +413,9 @@ class CheckHDDTemp(object):
                     "performance-data": "; ".join(
                         [
                             self.PERFORMANCE_DATA_TEMPLATE.format(
-                                **states[device]["data"]
+                                **data[device]["data"]
                             )
-                            for device in states.keys()
+                            for device in data.keys()
                         ]
                     ),
                 }
@@ -432,10 +435,8 @@ class CheckHDDTemp(object):
         :rtype: None
         """
 
-        return self.output(
-            states=self.check_hddtemp(
-                data=self.parse_response(response=self.get_data())
-            )
+        return self._get_output(
+            data=self._check_data(data=self._parse_data(data=self._get_data()))
         )
 
 
