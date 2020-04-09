@@ -22,7 +22,7 @@ tox:
 
 
 test:
-	pipenv run py.test -p no:cacheprovider -v tests --cov=check_hddtemp --verbose --color=yes;\
+	py.test -p no:cacheprovider -v tests --cov=check_hddtemp --verbose --color=yes;\
 
 
 bumpversion:
@@ -40,19 +40,19 @@ sign:
 
 
 check:
-	pipenv run pre-commit run --all-files;\
+	pre-commit run --all-files;\
 
 
 check-build:
-	pipenv run twine check dist/*;\
+	twine check dist/*;\
 
 
 check-upload:
-	pipenv run twine upload --skip-existing -s --repository-url $(TEST_PYPI_URL) dist/*;\
+	twine upload --skip-existing -s --repository-url $(TEST_PYPI_URL) dist/*;\
 
 
 upload:
-	pipenv run twine upload --skip-existing -s dist/*;\
+	twine upload --skip-existing -s dist/*;\
 
 
 clean:
@@ -65,7 +65,7 @@ clean:
 
 
 coveralls:
-	pipenv run coveralls;\
+	coveralls;\
 
 
 release:

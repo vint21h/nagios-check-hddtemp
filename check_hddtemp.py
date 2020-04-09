@@ -265,7 +265,7 @@ class CheckHDDTemp(object):
         :rtype: Dict[str, Dict[str, str]]
         """
 
-        info = OrderedDict()
+        info = {}
         data = data.split(self.options.separator * 2)
 
         if data != [""]:
@@ -302,7 +302,7 @@ class CheckHDDTemp(object):
         :rtype: Dict[str, Dict[str, Union[str, Dict[str, Union[None, int, str]]]]]
         """
 
-        states = OrderedDict()
+        states = {}
 
         if self.options.devices:
             devices = map(
