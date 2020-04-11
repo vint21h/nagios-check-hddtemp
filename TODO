@@ -1,5 +1,2 @@
 # nagios-check-hddtemp
 # TODO
-
-
- - Split "_get_output" method to "_get_output" and "_get_code"

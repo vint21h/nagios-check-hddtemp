@@ -62,6 +62,12 @@ __all__ = [
     "test_check__warning",
     "test_check__warning__performance_data",
     "test_main",
+    "test__get_code",
+    "test__get_code__critical",
+    "test__get_code__sleeping",
+    "test__get_code__warning",
+    "test__get_code__unknown_device",
+    "test__get_code__unknown_device_temperature",
 ]
 
 
@@ -596,6 +602,83 @@ def test__get_status__sleeping(mocker):
     assert result == "ok"  # nosec: B101
 
 
+def test__get_code(mocker):
+    """
+    Test "_get_code" method must return plugin exit code.
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="ok")
+
+    assert result == 0  # nosec: B101
+
+
+def test__get_code__critical(mocker):
+    """
+    Test "_get_code" method must return plugin exit code
+    (critical case).
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="critical")
+
+    assert result == 2  # nosec: B101
+
+
+def test__get_code__warning(mocker):
+    """
+    Test "_get_code" method must return plugin exit code
+    (warning case).
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="warning")
+
+    assert result == 1  # nosec: B101
+
+
+def test__get_code__unknown_device(mocker):
+    """
+    Test "_get_code" method must return plugin exit code
+    (unknown device case).
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="unknown")
+
+    assert result == 3  # nosec: B101
+
+
+def test__get_code__unknown_device_temperature(mocker):
+    """
+    Test "_get_code" method must return plugin exit code
+    (unknown device temperature case).
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="unknown")
+
+    assert result == 3  # nosec: B101
+
+
+def test__get_code__sleeping(mocker):
+    """
+    Test "_get_code" method must return plugin exit code
+    (sleeping case).
+    """
+
+    mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
+    checker = CheckHDDTemp()
+    result = checker._get_code(status="sleeping")
+
+    assert result == 0  # nosec: B101
+
+
 def test__get_output(mocker):
     """
     Test "_get_output" method must return Nagios and human readable HDD's statuses.
@@ -618,15 +701,14 @@ def test__get_output(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 0  # nosec: B101
 
 
 def test__get_output__critical(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     (critical case).
     """
 
@@ -658,15 +740,14 @@ def test__get_output__critical(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 2  # nosec: B101
 
 
 def test__get_output__warning(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     (warning case).
     """
 
@@ -698,15 +779,14 @@ def test__get_output__warning(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 1  # nosec: B101
 
 
 def test__get_output__unknown_device(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     (unknown device case).
     """
 
@@ -738,15 +818,14 @@ def test__get_output__unknown_device(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 3  # nosec: B101
 
 
 def test__get_output__unknown_device_temperature(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     (unknown device temperature case).
     """
 
@@ -778,15 +857,14 @@ def test__get_output__unknown_device_temperature(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 3  # nosec: B101
 
 
 def test__get_output__sleeping(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     (sleeping case).
     """
 
@@ -818,15 +896,14 @@ def test__get_output__sleeping(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, code = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
-    assert code == 0  # nosec: B101
 
 
 def test__get_output__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data.
     """
 
@@ -849,14 +926,14 @@ def test__get_output__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
 
 def test__get_output__critical__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data (critical case).
     """
 
@@ -890,14 +967,14 @@ def test__get_output__critical__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
 
 def test__get_output__warning__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data (warning case).
     """
 
@@ -931,14 +1008,14 @@ def test__get_output__warning__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
 
 def test__get_output__unknown_device__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data (unknown device temperature case).
     """
 
@@ -972,14 +1049,14 @@ def test__get_output__unknown_device__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
 
 def test__get_output__unknown_device_temperature__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data (unknown device case).
     """
 
@@ -1013,14 +1090,14 @@ def test__get_output__unknown_device_temperature__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
 
 def test__get_output__sleeping__performance_data(mocker):
     """
-    Test "_get_output" method must return Nagios and human readable HDD's statuses
+    Test "_get_output" method must return human readable HDD's statuses
     with performance data (sleeping case).
     """
 
@@ -1054,7 +1131,7 @@ def test__get_output__sleeping__performance_data(mocker):
     )
     checker = CheckHDDTemp()
     status = checker._get_status(data=data)
-    result, _ = checker._get_output(data=data, status=status)
+    result = checker._get_output(data=data, status=status)
 
     assert result == expected  # nosec: B101
 
