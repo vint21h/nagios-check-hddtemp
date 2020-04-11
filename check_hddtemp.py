@@ -299,7 +299,7 @@ class CheckHDDTemp(object):
         :param data: structured data parsed from hddtemp server response
         :type data: Dict[str, Dict[str, str]]
         :return: devices states info
-        :rtype: Dict[str, Dict[str, Union[str, Dict[str, Union[None, int, str]]]]]
+        :rtype: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]
         """
 
         states = {}
@@ -392,23 +392,37 @@ class CheckHDDTemp(object):
 
         return status
 
+    def _get_code(self, status):
+        """
+        Create exit code.
+
+        :param status: main check status
+        :type status: str
+        :return: exit code
+        :rtype: int
+        """
+
+        return self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)
+
     def _get_output(self, data, status):
         """
-        Create Nagios and human readable HDD's statuses.
+        Create human readable HDD's statuses.
 
         :param data: devices states info
         :type data: Dict[str, Dict[str, Union[str, int, Dict[str, Union[None, int, str]]]]]  # noqa: E501
         :param status: main check status
         :type status: str
-        :return: Nagios and human readable HDD's statuses
-        :rtype: Tuple[str, int]
+        :return: human readable HDD's statuses
+        :rtype: str
         """
 
         output = ""
         # sort devices data by priority
-        data = OrderedDict(sorted(data.items(), key=lambda item: item[1]["priority"]))
+        data = OrderedDict(
+            sorted(data.items(), key=lambda item: (item[1]["priority"], item[0]))
+        )
 
-        code = self.EXIT_CODES.get(status, self.DEFAULT_EXIT_CODE)  # create exit code
+        # create output
         devices = ", ".join(
             [
                 self.OUTPUT_TEMPLATES[data[device]["template"]]["text"].format(
@@ -440,7 +454,7 @@ class CheckHDDTemp(object):
                 **{"status": status.upper(), "data": devices}
             )
 
-        return output, code
+        return output
 
     def check(self):
         """
@@ -452,8 +466,9 @@ class CheckHDDTemp(object):
 
         data = self._check_data(data=self._parse_data(data=self._get_data()))
         status = self._get_status(data=data)
+        code = self._get_code(status=status)
 
-        return self._get_output(data=data, status=status)
+        return self._get_output(data=data, status=status), code
 
 
 def main():
