@@ -9,7 +9,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = (1, 1, 0)
+VERSION = (1, 1, 1)
 __version__ = ".".join(map(str, VERSION))
 
 DATA = [
@@ -31,6 +31,7 @@ setup(
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
     license="GPLv3+",
+    license_file="COPYING",
     url="https://github.com/vint21h/nagios-check-hddtemp/",
     download_url="https://github.com/vint21h/nagios-check-hddtemp/archive/{version}.tar.gz".format(  # noqa: E501
         version=__version__
