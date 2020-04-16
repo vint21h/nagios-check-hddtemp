@@ -104,14 +104,12 @@ class CheckHDDTemp(object):
     }
     PERFORMANCE_DATA_TEMPLATE = "{device}={temperature}"
 
-    options = None
-
     def __init__(self):
         """
         Get command line args.
         """
 
-        self.options = self._get_options()
+        self.options = self._get_options()  # type: ignore
 
     @staticmethod
     def _get_options():
@@ -340,9 +338,9 @@ class CheckHDDTemp(object):
                 except ValueError:
                     temperature = info["temperature"]
 
-                if temperature == self.HDDTEMP_SLEEPING:
+                if temperature == self.HDDTEMP_SLEEPING:  # type: ignore
                     template = self.STATUS_SLEEPING
-                elif temperature == self.HDDTEMP_UNKNOWN:
+                elif temperature == self.HDDTEMP_UNKNOWN:  # type: ignore
                     template = self.STATUS_UNKNOWN
                 elif temperature > self.options.critical:
                     template = self.STATUS_CRITICAL
@@ -423,7 +421,7 @@ class CheckHDDTemp(object):
         # create output
         devices = ", ".join(
             [
-                self.OUTPUT_TEMPLATES[data[device]["template"]]["text"].format(
+                str(self.OUTPUT_TEMPLATES[data[device]["template"]]["text"]).format(
                     **data[device]["data"]
                 )
                 for device in data.keys()
@@ -459,23 +457,26 @@ class CheckHDDTemp(object):
         """
         Get data from server, parse server response, check and create plugin output.
 
-        :return: nothing
-        :rtype: None
+        :return: plugin output and exit code
+        :rtype: Tuple[str, int]
         """
 
-        data = self._check_data(data=self._parse_data(data=self._get_data()))
-        status = self._get_status(data=data)
-        code = self._get_code(status=status)
+        data = self._check_data(data=self._parse_data(data=self._get_data()))  # type: ignore  # noqa: E501
+        status = self._get_status(data=data)  # type: ignore
+        code = self._get_code(status=status)  # type: ignore
 
-        return self._get_output(data=data, status=status), code
+        return self._get_output(data=data, status=status), code  # type: ignore
 
 
 def main():
     """
     Program main.
+
+    :return: nothing
+    :rtype: None
     """
 
-    checker = CheckHDDTemp()
+    checker = CheckHDDTemp()  # type: ignore
     output, code = checker.check()
     sys.stdout.write(output)
     sys.exit(code)
@@ -483,4 +484,4 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    main()  # type: ignore
