@@ -471,9 +471,6 @@ class CheckHDDTemp(object):
 def main():
     """
     Program main.
-
-    :return: nothing
-    :rtype: None
     """
 
     checker = CheckHDDTemp()  # type: ignore
