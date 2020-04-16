@@ -12,7 +12,7 @@ A nagios-check-hddtemp documentation
 
 Installation
 ------------
-* Obtain your copy of source code from the git repository: ``$ git clone https://github.com/vint21h/agios-check-hddtemp.git``. Or download the latest release from https://github.com/vint21h/nagios-check-hddtemp/tags/.
+* Obtain your copy of source code from the git repository: ``$ git clone https://github.com/vint21h/nagios-check-hddtemp.git``. Or download the latest release from https://github.com/vint21h/nagios-check-hddtemp/tags/.
 * Run ``$ python ./setup.py install`` from the repository source tree or unpacked archive. Or use pip: ``$ pip install nagios-check-hddtemp``.
 
 Configuration
