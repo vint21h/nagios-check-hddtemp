@@ -303,13 +303,11 @@ class CheckHDDTemp(object):
         """
 
         states = {}
-
-        if self.options.devices:
-            devices = map(
-                lambda dev: dev.strip(), self.options.devices.strip().split(",")
-            )
-        else:
-            devices = data.keys()
+        devices = (
+            map(lambda dev: dev.strip(), self.options.devices.strip().split(","))
+            if self.options.devices
+            else data.keys()
+        )
 
         for device in devices:
             if device:  # not empty string
@@ -434,8 +432,8 @@ class CheckHDDTemp(object):
 
         # create full status string with main status for multiple devices
         # and all devices states with performance data (optional)
-        if self.options.performance:
-            output = "{status}: {data} | {performance-data}\n".format(
+        output = (
+            "{status}: {data} | {performance-data}\n".format(
                 **{
                     "status": status.upper(),
                     "data": devices,
@@ -449,10 +447,11 @@ class CheckHDDTemp(object):
                     ),
                 }
             )
-        else:
-            output = "{status}: {data}\n".format(
+            if self.options.performance
+            else "{status}: {data}\n".format(
                 **{"status": status.upper(), "data": devices}
             )
+        )
 
         return output
 
