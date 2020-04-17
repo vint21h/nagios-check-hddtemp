@@ -211,7 +211,7 @@ class CheckHDDTemp(object):
             "-v",
             "--version",
             action="version",
-            version="{version}".format(**{"version": __version__}),
+            version="{version}".format(version=__version__),
         )
 
         options = parser.parse_args()
