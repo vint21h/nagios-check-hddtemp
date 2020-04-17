@@ -218,12 +218,12 @@ class CheckHDDTemp(object):
 
         # check mandatory command line options supplied
         if not options.server:
-            parser.error("Required server address option missing")
+            parser.error(message="Required server address option missing")
 
         # check if waning temperature in args less than critical
         if options.warning >= options.critical:
             parser.error(
-                "Warning temperature option value must be less than critical option value"  # noqa: E501
+                message="Warning temperature option value must be less than critical option value"  # noqa: E501
             )
 
         return options
