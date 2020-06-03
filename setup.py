@@ -57,6 +57,7 @@ setup(
     ],
     extras_require={
         "test": [
+            "attrs==19.3.0",
             "bandit==1.6.2",
             "black==19.10b0",
             "check-manifest==0.42",
