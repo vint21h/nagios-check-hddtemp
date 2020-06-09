@@ -68,7 +68,6 @@ setup(
             "flake8-annotations-complexity==0.0.4",
             "flake8-bugbear==20.1.4",
             "flake8-docstrings==1.5.0",
-            "flake8-mypy==17.8.0",
             "flake8==3.8.3",
             "interrogate==1.2.0",
             "isort[pipfile]==4.3.21",
