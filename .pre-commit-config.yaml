@@ -41,7 +41,7 @@ repos:
       name: interrogate
       stages: [commit]
       language: system
-      entry: interrogate . -I -M
+      entry: pipenv run interrogate . -I -M
       types: [python]
     - id: pylint
       name: pylint
