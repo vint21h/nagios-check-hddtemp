@@ -6,12 +6,12 @@
 
 from __future__ import unicode_literals
 
-from argparse import Namespace
-from io import StringIO
 import socket
+from io import StringIO
+from argparse import Namespace
 
-import contextlib2
 import pytest
+import contextlib2
 
 from check_hddtemp import CheckHDDTemp, main
 
@@ -129,7 +129,8 @@ def test__get_data(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
 
     checker = CheckHDDTemp()
@@ -1145,7 +1146,8 @@ def test_check(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
     checker = CheckHDDTemp()
     result, code = checker.check()
@@ -1217,7 +1219,8 @@ def test_check__unknown_device(mocker):
     checker = CheckHDDTemp()
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
     result, code = checker.check()
 
@@ -1278,7 +1281,8 @@ def test_check__performance_data(mocker):
     checker = CheckHDDTemp()
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
     result, code = checker.check()
 
@@ -1352,7 +1356,8 @@ def test_check__unknown_device__performance_data(mocker):
     )
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
     checker = CheckHDDTemp()
     result, code = checker.check()
@@ -1415,7 +1420,8 @@ def test_main(mocker):
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
-        "telnetlib.Telnet.read_all", lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
+        "telnetlib.Telnet.read_all",
+        lambda data: b"|/dev/sda|HARD DRIVE|27|C|",
     )
 
     with pytest.raises(SystemExit) as excinfo:

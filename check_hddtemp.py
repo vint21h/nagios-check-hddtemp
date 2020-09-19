@@ -26,11 +26,11 @@
 
 from __future__ import unicode_literals
 
+import sys
+import socket
+import telnetlib
 from argparse import ArgumentParser
 from collections import OrderedDict
-import socket
-import sys
-import telnetlib
 
 
 __all__ = [
