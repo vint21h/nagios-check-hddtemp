@@ -5,7 +5,12 @@
 
 from typing import List  # pylint: disable=W0611
 
-from pytest_mock.plugin import MockerFixture
+try:
+    from pytest_mock.plugin import MockerFixture  # pylint: disable=W0611  # noqa: F401
+except ImportError:
+    from pytest_mock.plugin import (  # type: ignore  # pylint: disable=W0611  # noqa: F401,E501
+        MockFixture as MockerFixture,
+    )
 
 __all__: List[str] = ...
 

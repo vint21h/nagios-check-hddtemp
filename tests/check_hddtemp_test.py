@@ -12,7 +12,14 @@ from argparse import Namespace
 
 import pytest
 import contextlib2
-from pytest_mock.plugin import MockerFixture  # pylint: disable=W0611  # noqa: F401
+
+
+try:
+    from pytest_mock.plugin import MockerFixture  # pylint: disable=W0611  # noqa: F401
+except ImportError:
+    from pytest_mock.plugin import (  # type: ignore  # pylint: disable=W0611  # noqa: F401,E501
+        MockFixture as MockerFixture,
+    )
 
 from check_hddtemp import CheckHDDTemp, main
 
