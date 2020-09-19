@@ -97,7 +97,7 @@ setup(
             "coveralls==1.11.1",
             "pygments==2.5.2",
             "pytest-cov==2.10.1",
-            "pytest-mock==3.3.1",
+            "pytest-mock==2.0.0",
             "pytest-tldr==0.2.2",
             "pytest==4.6.9",
             "readme_renderer==26.0",
