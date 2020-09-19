@@ -3,9 +3,11 @@
 # nagios-check-hddtemp
 # check_hddtemp.pyi
 
+
 from typing import List, Dict, Union, Tuple  # pylint: disable=W0611
 
 from argparse import Namespace
+
 
 __all__: List[str] = ...
 

@@ -12,6 +12,7 @@ from argparse import Namespace
 
 import pytest
 import contextlib2
+from pytest_mock.plugin import MockerFixture  # pylint: disable=W0611  # noqa: F401
 
 from check_hddtemp import CheckHDDTemp, main
 
@@ -74,6 +75,9 @@ __all__ = [
 def test__get_options(mocker):
     """
     Test "_get_options" method must return argparse namespace.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -85,6 +89,9 @@ def test__get_options(mocker):
 def test__get_options__missing_server_option(mocker):
     """
     Test "_get_options" method must exit with server option missing error.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()
@@ -103,6 +110,9 @@ def test__get_options__warning_gte_critical(mocker):
     """
     Test "_get_options" method must exit with warning option
     greater or equal than critical error.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()
@@ -123,6 +133,9 @@ def test__get_options__warning_gte_critical(mocker):
 def test__get_data(mocker):
     """
     Test "_get_data" method must return data from server.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "|/dev/sda|HARD DRIVE|27|C|"
@@ -142,6 +155,9 @@ def test__get_data(mocker):
 def test__get_data__network_error(mocker):
     """
     Test "_get_data" method must exit with network error.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()
@@ -162,6 +178,9 @@ def test__get_data__network_error(mocker):
 def test__parse_data(mocker):
     """
     Test "_parse_data" method must return structured data.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -177,6 +196,9 @@ def test__parse_data(mocker):
 def test__parse_data__too_short_error(mocker):
     """
     Test "_parse_data" method must exit with too short response error.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()
@@ -193,6 +215,9 @@ def test__parse_data__too_short_error(mocker):
 def test__parse_data__parsing_error(mocker):
     """
     Test "_parse_data" method must exit with parsing error.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()
@@ -209,6 +234,9 @@ def test__parse_data__parsing_error(mocker):
 def test__check_data(mocker):
     """
     Test "_check_data" method must return devices states info.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -236,6 +264,9 @@ def test__check_data(mocker):
 def test__check_data__warning(mocker):
     """
     Test "_check_data" method must return devices states info (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -263,6 +294,9 @@ def test__check_data__warning(mocker):
 def test__check_data__critical(mocker):
     """
     Test "_check_data" method must return devices states info (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -290,6 +324,9 @@ def test__check_data__critical(mocker):
 def test__check_data__sleeping_device(mocker):
     """
     Test "_check_data" method must return devices states info (sleeping device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -318,6 +355,9 @@ def test__check_data__unknown_device_temperature(mocker):
     """
     Test "_check_data" method must return devices states info
     (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -345,6 +385,9 @@ def test__check_data__unknown_device_temperature(mocker):
 def test__check_data__unknown_device(mocker):
     """
     Test "_check_data" method must return devices states info (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = {
@@ -394,6 +437,9 @@ def test__check_data__unknown_device(mocker):
 def test__get_status(mocker):
     """
     Test "_get_status" method must return main check status.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -420,6 +466,9 @@ def test__get_status(mocker):
 def test__get_status__critical(mocker):
     """
     Test "_get_status" method must return main check status (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -457,6 +506,9 @@ def test__get_status__critical(mocker):
 def test__get_status__warning(mocker):
     """
     Test "_get_status" method must return main check status (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -494,6 +546,9 @@ def test__get_status__warning(mocker):
 def test__get_status__unknown_device(mocker):
     """
     Test "_get_status" method must return main check status (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -532,6 +587,9 @@ def test__get_status__unknown_device_temperature(mocker):
     """
     Test "_get_status" method must return main check result
     (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -569,6 +627,9 @@ def test__get_status__unknown_device_temperature(mocker):
 def test__get_status__sleeping(mocker):
     """
     Test "_get_status" method must return main check status (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -606,6 +667,9 @@ def test__get_status__sleeping(mocker):
 def test__get_code(mocker):
     """
     Test "_get_code" method must return plugin exit code.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -619,6 +683,9 @@ def test__get_code__critical(mocker):
     """
     Test "_get_code" method must return plugin exit code
     (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -632,6 +699,9 @@ def test__get_code__warning(mocker):
     """
     Test "_get_code" method must return plugin exit code
     (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -645,6 +715,9 @@ def test__get_code__unknown_device(mocker):
     """
     Test "_get_code" method must return plugin exit code
     (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -658,6 +731,9 @@ def test__get_code__unknown_device_temperature(mocker):
     """
     Test "_get_code" method must return plugin exit code
     (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -671,6 +747,9 @@ def test__get_code__sleeping(mocker):
     """
     Test "_get_code" method must return plugin exit code
     (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
@@ -683,6 +762,9 @@ def test__get_code__sleeping(mocker):
 def test__get_output(mocker):
     """
     Test "_get_output" method must return Nagios and human readable HDD's statuses.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C\n"
@@ -711,6 +793,9 @@ def test__get_output__critical(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -750,6 +835,9 @@ def test__get_output__warning(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -789,6 +877,9 @@ def test__get_output__unknown_device(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -828,6 +919,9 @@ def test__get_output__unknown_device_temperature(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -867,6 +961,9 @@ def test__get_output__sleeping(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping\n"  # noqa: E501
@@ -906,6 +1003,9 @@ def test__get_output__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C | /dev/sda=27\n"
@@ -936,6 +1036,9 @@ def test__get_output__critical__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C | /dev/sdb=69; /dev/sda=27\n"  # noqa: E501
@@ -977,6 +1080,9 @@ def test__get_output__warning__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C | /dev/sdb=42; /dev/sda=27\n"  # noqa: E501
@@ -1018,6 +1124,9 @@ def test__get_output__unknown_device__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=None; /dev/sda=27\n"  # noqa: E501
@@ -1059,6 +1168,9 @@ def test__get_output__unknown_device_temperature__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=UNK; /dev/sda=27\n"  # noqa: E501
@@ -1100,6 +1212,9 @@ def test__get_output__sleeping__performance_data(mocker):
     """
     Test "_get_output" method must return human readable HDD's statuses
     with performance data (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping | /dev/sda=27; /dev/sdb=SLP\n"  # noqa: E501
@@ -1140,6 +1255,9 @@ def test__get_output__sleeping__performance_data(mocker):
 def test_check(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C\n"
@@ -1160,6 +1278,9 @@ def test_check__critical(mocker):
     """
     Test "_get_output" method must return Nagios and human readable HDD's statuses
     (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -1181,6 +1302,9 @@ def test_check__warning(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -1201,6 +1325,9 @@ def test_check__unknown_device(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -1232,6 +1359,9 @@ def test_check__unknown_device_temperature(mocker):
     """
     Test "_get_output" method must return Nagios and human readable HDD's statuses
     (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C\n"  # noqa: E501
@@ -1252,6 +1382,9 @@ def test_check__sleeping(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping\n"  # noqa: E501
@@ -1272,6 +1405,9 @@ def test_check__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C | /dev/sda=27\n"
@@ -1294,6 +1430,9 @@ def test_check__critical__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data (critical case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "CRITICAL: device /dev/sdb temperature 69C exceeds critical temperature threshold 65C, device /dev/sda is functional and stable 27C | /dev/sdb=69; /dev/sda=27\n"  # noqa: E501
@@ -1316,6 +1455,9 @@ def test_check__warning__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data (warning case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "WARNING: device /dev/sdb temperature 42C exceeds warning temperature threshold 40C, device /dev/sda is functional and stable 27C | /dev/sdb=42; /dev/sda=27\n"  # noqa: E501
@@ -1338,6 +1480,9 @@ def test_check__unknown_device__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data (unknown device case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=None; /dev/sda=27\n"  # noqa: E501
@@ -1370,6 +1515,9 @@ def test_check__unknown_device_temperature__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data (unknown device temperature case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "UNKNOWN: device /dev/sdb temperature info not found in server response or can't be recognized by hddtemp, device /dev/sda is functional and stable 27C | /dev/sdb=UNK; /dev/sda=27\n"  # noqa: E501
@@ -1392,6 +1540,9 @@ def test_check__sleeping__performance_data(mocker):
     """
     Test "check" method must return Nagios and human readable HDD's statuses
     with performance data (sleeping case).
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     expected = "OK: device /dev/sda is functional and stable 27C, device /dev/sdb is sleeping | /dev/sda=27; /dev/sdb=SLP\n"  # noqa: E501
@@ -1413,6 +1564,9 @@ def test_check__sleeping__performance_data(mocker):
 def test_main(mocker):
     """
     Test "main" function must print Nagios and human readable HDD's statuses.
+
+    :param mocker: mock
+    :type mocker: MockerFixture
     """
 
     out = StringIO()

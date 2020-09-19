@@ -64,6 +64,7 @@ setup(
             "contextlib2==0.6.0.post1",
             "coverage==5.3",
             "coveralls==2.1.2",
+            "darglint==1.5.4",
             "dodgy==0.2.1",
             "flake8==3.8.3",
             "flake8-annotations-complexity==0.0.5",
