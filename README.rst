@@ -4,7 +4,7 @@
 A nagios-check-hddtemp documentation
 ====================================
 
-|Travis|_ |Coveralls|_ |Requires|_ |pypi-license|_ |pypi-version|_ |pypi-python-version|_ |pypi-format|_ |pypi-wheel|_ |pypi-status|_
+|Travis|_ |Coveralls|_ |pypi-license|_ |pypi-version|_ |pypi-python-version|_ |pypi-format|_ |pypi-wheel|_ |pypi-status|_
 
     *nagios-check-hddtemp is a Nagios-plugin that uses hddtemp (www.guzu.net/linux/hddtemp.php) to check disk temperature over the network*
 
@@ -68,8 +68,6 @@ For other authors list see AUTHORS file.
     :alt: Travis
 .. |Coveralls| image:: https://coveralls.io/repos/github/vint21h/nagios-check-hddtemp/badge.svg?branch=master
     :alt: Coveralls
-.. |Requires| image:: https://requires.io/github/vint21h/nagios-check-hddtemp/requirements.svg?branch=master
-    :alt: Requires
 .. |pypi-license| image:: https://img.shields.io/pypi/l/nagios-check-hddtemp
     :alt: License
 .. |pypi-version| image:: https://img.shields.io/pypi/v/nagios-check-hddtemp
@@ -84,7 +82,6 @@ For other authors list see AUTHORS file.
     :alt: Package status
 .. _Travis: https://travis-ci.org/vint21h/nagios-check-hddtemp/
 .. _Coveralls: https://coveralls.io/github/vint21h/nagios-check-hddtemp?branch=master
-.. _Requires: https://requires.io/github/vint21h/nagios-check-hddtemp/requirements/?branch=master
 .. _pypi-license: https://pypi.org/project/nagios-check-hddtemp/
 .. _pypi-version: https://pypi.org/project/nagios-check-hddtemp/
 .. _pypi-python-version: https://pypi.org/project/nagios-check-hddtemp/
