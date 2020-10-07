@@ -70,6 +70,7 @@ setup(
             "flake8-annotations-complexity==0.0.5",
             "flake8-bugbear==20.1.4",
             "flake8-docstrings==1.5.0",
+            "flake8-fixme==1.1.1",
             "interrogate==1.3.1",
             "isort==5.5.4",
             "mypy==0.782",
