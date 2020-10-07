@@ -3,8 +3,5 @@
 
 
 include check_hddtemp.py
-include README.rst
-include COPYING
-include AUTHORS
+recursive-include *.pyi
 recursive-exclude tests *.py
-recursive-exclude *.pyi

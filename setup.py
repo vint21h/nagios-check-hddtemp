@@ -61,6 +61,7 @@ setup(
             "bandit==1.6.2",
             "black==20.8b1",
             "check-manifest==0.44",
+            "check-wheel-contents==0.1.0",
             "contextlib2==0.6.0.post1",
             "coverage==5.3",
             "coveralls==2.1.2",
