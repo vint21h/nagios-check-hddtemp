@@ -474,7 +474,7 @@ def main():
     """
 
     checker = CheckHDDTemp()  # type: ignore
-    output, code = checker.check()
+    output, code = checker.check()  # type: ignore
     sys.stdout.write(output)
     sys.exit(code)
 
