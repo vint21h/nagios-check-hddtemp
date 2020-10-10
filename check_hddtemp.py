@@ -40,7 +40,7 @@ __all__ = [
 
 
 # metadata
-VERSION = (1, 4, 1)
+VERSION = (1, 4, 2)
 __version__ = ".".join(map(str, VERSION))
 
 
