@@ -73,7 +73,7 @@ setup(
             "flake8-docstrings==1.5.0",
             "flake8-fixme==1.1.1",
             "interrogate==1.3.1",
-            "isort==5.6.1",
+            "isort==5.6.2",
             "mypy==0.790",
             "pep8-naming==0.11.1",
             "pre-commit==2.7.1",
