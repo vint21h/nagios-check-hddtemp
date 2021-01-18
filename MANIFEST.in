@@ -2,6 +2,7 @@
 # MANIFEST.in
 
 
+prune .github*
 include check_hddtemp.py
 recursive-include *.pyi
 recursive-exclude tests *.py
