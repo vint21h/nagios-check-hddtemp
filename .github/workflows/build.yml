@@ -87,7 +87,7 @@ jobs:
       - name: Install dependencies
         if: matrix.python-version == '3.6' || matrix.python-version == '3.7' || matrix.python-version == '3.8' || matrix.python-version == '3.9'
         run: |
-          pip install .[test-old-python]
+          pip install .[test]
       - name: Run tests
         env:
           PLATFORM: ${{ matrix.platform }}
