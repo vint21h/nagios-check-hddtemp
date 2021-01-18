@@ -1577,7 +1577,7 @@ def test_main(mocker):
     """
 
     out = StringIO()
-    expected = "OK: device /dev/sda is functional and stable 27C\n"  # noqa: E501
+    expected = "OK: device /dev/sda is functional and stable 27C\n"
     mocker.patch("sys.argv", ["check_hddtemp.py", "-s", "127.0.0.1", "-p", "7634"])
     mocker.patch("telnetlib.Telnet.open")
     mocker.patch(
