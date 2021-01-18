@@ -80,7 +80,7 @@ jobs:
       - name: Install base dependencies
         run: |
           pip install pipenv
-      - name: Install dependencies
+      - name: Install old python dependencies
         if: matrix.python-version == '2.7'
         run: |
           pip install .[test-old-python]
