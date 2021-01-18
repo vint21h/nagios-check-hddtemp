@@ -81,11 +81,11 @@ jobs:
         run: |
           pip install pipenv
       - name: Install dependencies
-        if: matrix.python-version == "2.7"
+        if: matrix.python-version == '2.7'
         run: |
           pip install .[test-old-python]
       - name: Install dependencies
-        if: matrix.python-version == "2.7" || matrix.python-version == "3.6" || matrix.python-version == "3.7" || matrix.python-version == "3.8" || matrix.python-version == "3.9"
+        if: matrix.python-version == '3.6' || matrix.python-version == '3.7' || matrix.python-version == '3.8' || matrix.python-version == '3.9'
         run: |
           pip install .[test-old-python]
       - name: Run tests
