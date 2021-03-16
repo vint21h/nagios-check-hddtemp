@@ -40,7 +40,7 @@ __all__ = [
 
 
 # metadata
-VERSION = (1, 4, 11)
+VERSION = (1, 4, 12)
 __version__ = ".".join(map(str, VERSION))
 
 
@@ -383,7 +383,9 @@ class CheckHDDTemp(object):
         """
 
         # for multiple check need to get main status by priority
-        priority = min([info["priority"] for device, info in data.items()])
+        priority = min(  # noqa: C407
+            [info["priority"] for device, info in data.items()]
+        )
         status = self.PRIORITY_TO_STATUS.get(priority, self.PRIORITY_CRITICAL)
 
         return status
