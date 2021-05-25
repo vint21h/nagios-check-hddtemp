@@ -4,16 +4,15 @@
 
 .ONESHELL:
 PHONY: pipenv-install tox test bumpversion build sign check check-build check-upload upload clean coveralls release help
-TEST_PYPI_URL=https://test.pypi.org/legacy/
-TRASH_DIRS=build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov .pytest_cache
-TRASH_FILES=.coverage Pipfile.lock
-BUILD_TYPES=bdist_wheel sdist
-VERSION=`python -c "import check_hddtemp; print(check_hddtemp.__version__);"`
+TEST_PYPI_URL ?= https://test.pypi.org/legacy/
+TRASH_DIRS ?= build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov .pytest_cache
+TRASH_FILES ?= .coverage
+BUILD_TYPES ?= bdist_wheel sdist
+VERSION ?= `python -c "import check_hddtemp; print(check_hddtemp.__version__);"`
 
 
-pipenv-install:
-	pipenv install;\
-	pipenv install --dev;\
+install:
+	pip install .[test];\
 
 
 tox:
@@ -21,7 +20,7 @@ tox:
 
 
 test:
-	py.test -p no:cacheprovider -v tests --cov=check_hddtemp --verbose --color=yes;\
+	py.test -v tests --cov=check_hddtemp --color=yes --instafail $(TESTS);\
 
 
 bumpversion:
@@ -59,7 +58,7 @@ clean:
 		find -iname $${file} -print0 | xargs -0 rm -rf;\
 	done;\
 	for dir in $(TRASH_DIRS); do\
-		find -type d -name $${dir} -print0 | xargs -0 rm -rf;\
+		find -type d -name $${dir} ! -path "*/.direnv/*" -print0 | xargs -0 rm -rf;\
 	done;\
 
 
@@ -86,8 +85,8 @@ release:
 help:
 	@echo "    help:"
 	@echo "        Show this help."
-	@echo "    pipenv-install:"
-	@echo "        Install all requirements."
+	@echo "    install:"
+	@echo "        Install requirements."
 	@echo "    tox:"
 	@echo "        Run tox."
 	@echo "    test:"
