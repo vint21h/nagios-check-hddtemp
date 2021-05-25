@@ -3,7 +3,7 @@
 
 
 .ONESHELL:
-PHONY: pipenv-install tox test bumpversion build sign check check-build check-upload upload clean coveralls release help
+PHONY: install tox test bumpversion build sign check check-build check-upload upload clean coveralls release help
 TEST_PYPI_URL ?= https://test.pypi.org/legacy/
 TRASH_DIRS ?= build dist *.egg-info .tox .mypy_cache __pycache__ htmlcov .pytest_cache
 TRASH_FILES ?= .coverage
